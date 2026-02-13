@@ -145,6 +145,7 @@ const CanvasVectorBackground: React.FC<Props> = ({
 
         // ---------- aurora ----------
         function drawAurora(w: number, h: number, time: number) {
+            if (!ctx) return;
             ctx.save();
             ctx.globalCompositeOperation = "lighter";
             ctx.lineCap = "round";
@@ -214,6 +215,7 @@ const CanvasVectorBackground: React.FC<Props> = ({
             }
 
             // Fill polygon to bottom
+            if (!ctx) return
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(0, h);
@@ -272,6 +274,7 @@ const CanvasVectorBackground: React.FC<Props> = ({
         }
 
         function drawMountains(w: number, h: number) {
+            if (!ctx) return
             // Far gradient
             const farFill = (() => {
                 const g = ctx.createLinearGradient(0, h * 0.55, 0, h);
@@ -321,6 +324,7 @@ const CanvasVectorBackground: React.FC<Props> = ({
 
         // ---------- lake ----------
         function drawLake(w: number, h: number) {
+            if (!ctx) return
             ctx.save();
             const y0 = h * 0.86;
             const g = ctx.createLinearGradient(0, y0, 0, h);
