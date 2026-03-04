@@ -2,6 +2,7 @@ import CanvasBackground from "@/components/canvasBackground";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import CanvasVectorBackground from "@/components/canvasVectorBackground";
+import { Analytics } from "@vercel/analytics/next"
 
 
 export default function RootLayout({
@@ -19,6 +20,7 @@ export default function RootLayout({
                 <main>
                     {children}
                 </main>
+                <Analytics />
             </body>
         </html>
     );
