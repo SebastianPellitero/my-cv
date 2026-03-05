@@ -105,7 +105,7 @@ export default function HomePage() {
                             GitHub →
                         </a>
                         <Link
-                            href="/experience"
+                            href="/about"
                             className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-accent border-b border-accent pb-0.5 hover:opacity-60 transition-opacity"
                         >
                             Experience →

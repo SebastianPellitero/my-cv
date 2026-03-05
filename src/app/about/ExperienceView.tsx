@@ -158,12 +158,12 @@ export default function ExperienceView() {
         const outX = goingForward ? (fromRight ? '-40%' : 0) : (fromRight ? '100%' : 0)
         const outY = goingForward ? (fromRight ? 0 : '-40%') : (fromRight ? 0 : '100%')
 
-        gsap.set(inEl, { x: inX, y: inY, opacity: 1, zIndex: 2 })
+        gsap.set(inEl, { x: inX, y: inY, opacity: 1, zIndex: 2, visibility: 'visible' })
         gsap.set(outEl, { zIndex: 1 })
 
         const tl = gsap.timeline({
             onComplete: () => {
-                gsap.set(outEl, { zIndex: 0 })
+                gsap.set(outEl, { zIndex: 0, visibility: 'hidden' })
                 animating.current = false
                 currentRef.current = idx
 
@@ -206,7 +206,7 @@ export default function ExperienceView() {
         sectionRefs.current.forEach((el, i) => {
             if (!el || i === 0) return
             const fromRight = i % 2 === 1
-            gsap.set(el, { x: fromRight ? '100%' : 0, y: fromRight ? 0 : '100%', opacity: 0 })
+            gsap.set(el, { x: fromRight ? '100%' : 0, y: fromRight ? 0 : '100%', opacity: 0, visibility: 'hidden' })
         })
 
         // Animate first section in
@@ -331,7 +331,7 @@ export default function ExperienceView() {
                                     ['9+', 'Years of experience'],
                                     ['5', 'Companies & projects'],
                                     ['2', 'Countries'],
-                                    ['∞', 'Mate consumed'],
+                                    ['∞', '🧉 Mate consumed'],
                                 ].map(([num, label]) => (
                                     <div key={label} className={s.stat}>
                                         <span className={s.statNum}>{num}</span>
@@ -411,7 +411,6 @@ export default function ExperienceView() {
                         <div className={s.links} data-animate>
                             <a href="https://www.linkedin.com/in/sebastian-pellitero/" target="_blank" rel="noreferrer" className={s.link}>LinkedIn →</a>
                             <a href="https://github.com/SebastianPellitero" target="_blank" rel="noreferrer" className={s.link}>GitHub →</a>
-                            <a href="mailto:sebastian.pellitero@gmail.com" className={s.link}>Email →</a>
                         </div>
                         <span
                             className={s.decoNum}
