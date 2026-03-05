@@ -3,7 +3,12 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import CanvasVectorBackground from "@/components/canvasVectorBackground";
 import { Analytics } from "@vercel/analytics/react";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+    title: 'Sebastian Pellitero',
+    description: '...',
+}
 
 export default function RootLayout({
     children,

@@ -8,7 +8,6 @@ export default function BlogPage() {
         <main className="mx-auto max-w-3xl px-4 py-10">
             <h1 className="text-3xl font-semibold">Blog</h1>
             <p className="mt-2 text-neutral-600">Notes, experiments, and occasional frontend sorcery.</p>
-
             <ul className="mt-10 space-y-6">
                 {posts.map((p) => (
                     <li key={p.slug} className="rounded-2xl border border-neutral-200 p-5">
