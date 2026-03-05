@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+/* ─── Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
+
+@theme {
+  --color-teal: #2dd4bf;
+  --color-accent: #f0a500;
+  --color-dark: #0a0f0e;
+  --color-light: #e8f5f2;
+  --color-muted: #4a6b64;
+  --color-accent: #f0a500;
+}
+
+body.experience-page {
+  overflow: hidden;
+  cursor: none;
+  background: #0a0f0e;
+  font-family: 'DM Mono', monospace;
+  color: #e8f5f2;
+}
+
+
+/* Dark is the default — override for light OS preference */
+@media (prefers-color-scheme: light) {
+  body {
+    background: #ffffff;
+    color: #18181b;
+  }
+}
