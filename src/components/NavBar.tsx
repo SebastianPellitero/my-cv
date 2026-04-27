@@ -33,6 +33,7 @@ export default function NavBar() {
                 {/* Nav links */}
                 <div className="flex items-center gap-1">
                     <NavLink href="/about">Experience</NavLink>
+                    <NavLink href="/projects">Projects</NavLink>
                     <a
                         href="https://www.linkedin.com/in/sebastian-pellitero/"
                         target="_blank"
