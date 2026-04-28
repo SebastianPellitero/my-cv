@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+// import IntroGate from "@/components/intro/IntroGate";
 
 const skills = [
     {
@@ -18,6 +19,7 @@ const skills = [
 
 export default function HomePage() {
     return (
+        // <IntroGate>
         <main className="mx-auto max-w-5xl px-6 py-16">
 
             {/* ── Hero ── */}
@@ -146,5 +148,7 @@ export default function HomePage() {
             </section>
 
         </main>
+
     );
 }
+{/* </IntroGate> */ }
