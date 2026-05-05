@@ -9,6 +9,12 @@ export type IntroProject = {
     url: string
 }
 
+export type ThirdRingItem = {
+    id: string
+    label: string
+    url?: string
+}
+
 export const skills: Skill[] = [
     { label: 'React', abbr: 'Re', color: '#61dafb' },
     { label: 'TypeScript', abbr: 'TS', color: '#3178c6' },
@@ -31,4 +37,15 @@ export const introProjects: IntroProject[] = [
     { name: 'project-4', url: 'https://github.com/SebastianPellitero' },
     { name: 'project-5', url: 'https://github.com/SebastianPellitero' },
     { name: 'project-6', url: 'https://github.com/SebastianPellitero' },
+]
+
+export const thirdRingItems: ThirdRingItem[] = [
+    { id: 'item-1', label: '' },
+    { id: 'item-2', label: '' },
+    { id: 'item-3', label: '' },
+    { id: 'item-4', label: '' },
+    { id: 'item-5', label: '' },
+    { id: 'item-6', label: '' },
+    { id: 'item-7', label: '' },
+    { id: 'item-8', label: '' },
 ]

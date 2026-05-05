@@ -6,7 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ImpressBar from '../shared/ImpressBar'
 import SkillsRing from '../shared/SkillsRing'
 import ProjectsRing from '../shared/ProjectsRing'
-import { skills, introProjects } from '@/data/intro'
+import ThirdRing from '../shared/ThirdRing'
+import { skills, introProjects, thirdRingItems } from '@/data/intro'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -20,6 +21,7 @@ const copy = {
         s1: 'Ok, let me try to impress you.',
         s2: 'These are the technologies I work with.',
         s3: "And these are some of the things I've built.",
+        s4_label: "What I'm learning next.",
         s4: '9+ years of shipping products people actually use.',
         cta: "Convinced? Let's go →",
     },
@@ -27,6 +29,7 @@ const copy = {
         s1: 'Allow me to present my qualifications.',
         s2: 'Technical proficiencies.',
         s3: 'Selected works.',
+        s4_label: 'Future development areas.',
         s4: 'Nine years delivering products at scale, across three countries.',
         cta: "Let's proceed →",
     },
@@ -45,11 +48,16 @@ function TieIcon() {
     )
 }
 
+const SKILLS_RADIUS = 120
+const PROJECTS_RADIUS = 215
+const THIRD_RADIUS = 315
+
 export default function ImpressFlow({ formal = false, onDone }: Props) {
     const scrollerRef = useRef<HTMLDivElement>(null)
     const allRingsRef = useRef<HTMLDivElement>(null)
     const s2Ref = useRef<HTMLParagraphElement>(null)
     const s3Ref = useRef<HTMLParagraphElement>(null)
+    const s4LabelRef = useRef<HTMLParagraphElement>(null)
     const [progress, setProgress] = useState(0)
 
     const c = formal ? copy.formal : copy.default
@@ -76,14 +84,57 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
         // Section 1: animate text in on mount
         gsap.from('[data-s1]', { opacity: 0, y: 20, duration: 1, delay: 0.3 })
 
-        // Both labels start hidden — GSAP owns their opacity
+        // All labels start hidden — GSAP owns their opacity
         gsap.set(s2Ref.current, { opacity: 0, y: 8 })
         gsap.set(s3Ref.current, { opacity: 0, y: 8 })
+        gsap.set(s4LabelRef.current, { opacity: 0, y: 8 })
 
-        // Skills: init hidden
+        // --- Skill items: position via GSAP, init hidden ---
         const skillEls = gsap.utils.toArray<Element>('[data-skill-item]')
-        gsap.set(skillEls, { opacity: 0, scale: 0.5, transformOrigin: '50% 50%' })
+        skillEls.forEach((el, i) => {
+            const angle = (i / skills.length) * 2 * Math.PI - Math.PI / 2
+            gsap.set(el, {
+                x: Math.cos(angle) * SKILLS_RADIUS,
+                y: Math.sin(angle) * SKILLS_RADIUS,
+                xPercent: -50,
+                yPercent: -50,
+                opacity: 0,
+                scale: 0.5,
+                transformOrigin: '50% 50%',
+            })
+        })
 
+        // --- Project items: position via GSAP, init hidden ---
+        const projectEls = gsap.utils.toArray<Element>('[data-project-item]')
+        projectEls.forEach((el, i) => {
+            const angle = (i / introProjects.length) * 2 * Math.PI - Math.PI / 2
+            gsap.set(el, {
+                x: Math.cos(angle) * PROJECTS_RADIUS,
+                y: Math.sin(angle) * PROJECTS_RADIUS,
+                xPercent: -50,
+                yPercent: -50,
+                opacity: 0,
+                scale: 0.5,
+                transformOrigin: '50% 50%',
+            })
+        })
+
+        // --- Third ring items: position via GSAP, init hidden ---
+        const thirdEls = gsap.utils.toArray<Element>('[data-third-item]')
+        thirdEls.forEach((el, i) => {
+            const angle = (i / thirdRingItems.length) * 2 * Math.PI - Math.PI / 2
+            gsap.set(el, {
+                x: Math.cos(angle) * THIRD_RADIUS,
+                y: Math.sin(angle) * THIRD_RADIUS,
+                xPercent: -50,
+                yPercent: -50,
+                opacity: 0,
+                scale: 0.5,
+                transformOrigin: '50% 50%',
+            })
+        })
+
+        // --- Skills scroll-scrub: appear 0–300vh ---
         const skillsTl = gsap.timeline({
             scrollTrigger: {
                 scroller,
@@ -108,7 +159,7 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
 
-        // Ring phase toggle at 300vh mark — also drives the text crossfade
+        // --- Projects scroll-scrub: appear 300–600vh + label crossfade ---
         ScrollTrigger.create({
             scroller,
             trigger: allRingsRef.current,
@@ -123,10 +174,6 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
 
-        // Projects: init hidden
-        const projectEls = gsap.utils.toArray<Element>('[data-project-item]')
-        gsap.set(projectEls, { opacity: 0, scale: 0.5, transformOrigin: '50% 50%' })
-
         const projectsTl = gsap.timeline({
             scrollTrigger: {
                 scroller,
@@ -140,7 +187,48 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             projectsTl.to(el, { opacity: 1, scale: 1, duration: 1 }, i * (3 / introProjects.length))
         })
 
-        // Section 4
+        // --- Third ring scroll-scrub: appear 600–900vh + label crossfade ---
+        ScrollTrigger.create({
+            scroller,
+            trigger: allRingsRef.current,
+            start: `top+=${vh * 6} top`,
+            onEnter: () => {
+                gsap.to(s3Ref.current, { opacity: 0, y: -8, duration: 0.4 })
+                gsap.to(s4LabelRef.current, { opacity: 1, y: 0, duration: 0.4 })
+            },
+            onLeaveBack: () => {
+                gsap.to(s3Ref.current, { opacity: 1, y: 0, duration: 0.4 })
+                gsap.to(s4LabelRef.current, { opacity: 0, y: 8, duration: 0.4 })
+            },
+        })
+
+        const thirdTl = gsap.timeline({
+            scrollTrigger: {
+                scroller,
+                trigger: allRingsRef.current,
+                start: `top+=${vh * 6} top`,
+                end: `+=${vh * 3}`,
+                scrub: 0.5,
+            },
+        })
+        thirdEls.forEach((el, i) => {
+            thirdTl.to(el, { opacity: 1, scale: 1, duration: 1 }, i * (3 / thirdRingItems.length))
+        })
+
+        // --- Continuous orbital rotation (independent of scroll) ---
+        // Inner (skills): clockwise, items counter-rotate to stay upright
+        gsap.to('[data-skills-ring]', { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
+        gsap.to(skillEls, { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
+
+        // Middle (projects): counter-clockwise, items counter-rotate
+        gsap.to('[data-projects-ring]', { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
+        gsap.to(projectEls, { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
+
+        // Outer (third): clockwise, slower (larger circumference), items counter-rotate
+        gsap.to('[data-third-ring]', { rotation: 360, duration: 45, repeat: -1, ease: 'none' })
+        gsap.to(thirdEls, { rotation: -360, duration: 45, repeat: -1, ease: 'none' })
+
+        // --- Section 4 + CTA ---
         gsap.from('[data-s4]', {
             opacity: 0, y: 12, duration: 0.8,
             scrollTrigger: {
@@ -151,7 +239,6 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
 
-        // CTA
         gsap.from('[data-cta]', {
             opacity: 0, y: 20, duration: 0.8,
             scrollTrigger: {
@@ -189,11 +276,11 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                 </div>
             </div>
 
-            {/* Sections 2 + 3 — rings (600vh) */}
-            <div ref={allRingsRef} className={bgClass} style={{ height: '600vh' }}>
+            {/* Sections 2 + 3 + 4-label — rings (900vh) */}
+            <div ref={allRingsRef} className={bgClass} style={{ height: '900vh' }}>
                 <div className="sticky top-0 h-screen flex flex-col items-center justify-center gap-8 px-8 overflow-hidden">
 
-                    {/* Label — GSAP crossfade between s2 and s3 */}
+                    {/* Label — GSAP crossfade between s2, s3, and s4_label */}
                     <div className="relative h-6 flex items-center justify-center">
                         <p
                             ref={s2Ref}
@@ -207,20 +294,27 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                         >
                             {c.s3}
                         </p>
+                        <p
+                            ref={s4LabelRef}
+                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                        >
+                            {c.s4_label}
+                        </p>
                     </div>
 
-                    {/* Rings container — fixed pixel size, scaled for smaller viewports */}
+                    {/* Rings container — 700×700, scaled for smaller viewports */}
                     <div
                         className="relative flex-shrink-0"
                         style={{
-                            width: 500,
-                            height: 500,
-                            transform: `scale(${typeof window !== 'undefined' ? Math.min(1, (Math.min(window.innerWidth, window.innerHeight) - 80) / 500) : 1})`,
+                            width: 700,
+                            height: 700,
+                            transform: `scale(${typeof window !== 'undefined' ? Math.min(1, (Math.min(window.innerWidth, window.innerHeight) - 80) / 700) : 1})`,
                             transformOrigin: 'center center',
                         }}
                     >
-                        <SkillsRing radius={120} />
-                        <ProjectsRing radius={215} />
+                        <SkillsRing radius={SKILLS_RADIUS} />
+                        <ProjectsRing radius={PROJECTS_RADIUS} />
+                        <ThirdRing radius={THIRD_RADIUS} />
                     </div>
                 </div>
             </div>
