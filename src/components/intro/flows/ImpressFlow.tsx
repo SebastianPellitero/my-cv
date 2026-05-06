@@ -89,50 +89,23 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
         gsap.set(s3Ref.current, { opacity: 0, y: 8 })
         gsap.set(s4LabelRef.current, { opacity: 0, y: 8 })
 
-        // --- Skill items: position via GSAP, init hidden ---
+        // --- Skill items ---
         const skillEls = gsap.utils.toArray<Element>('[data-skill-item]')
-        skillEls.forEach((el, i) => {
-            const angle = (i / skills.length) * 2 * Math.PI - Math.PI / 2
-            gsap.set(el, {
-                x: Math.cos(angle) * SKILLS_RADIUS,
-                y: Math.sin(angle) * SKILLS_RADIUS,
-                xPercent: -50,
-                yPercent: -50,
-                opacity: 0,
-                scale: 0.5,
-                transformOrigin: '50% 50%',
-            })
-        })
+        const skillLabelEls = gsap.utils.toArray<Element>('[data-skill-label]')
+        gsap.set(skillEls, { opacity: 0 })
+        gsap.set(skillLabelEls, { opacity: 0 })
 
-        // --- Project items: position via GSAP, init hidden ---
+        // --- Project items ---
         const projectEls = gsap.utils.toArray<Element>('[data-project-item]')
-        projectEls.forEach((el, i) => {
-            const angle = (i / introProjects.length) * 2 * Math.PI - Math.PI / 2
-            gsap.set(el, {
-                x: Math.cos(angle) * PROJECTS_RADIUS,
-                y: Math.sin(angle) * PROJECTS_RADIUS,
-                xPercent: -50,
-                yPercent: -50,
-                opacity: 0,
-                scale: 0.5,
-                transformOrigin: '50% 50%',
-            })
-        })
+        const projectLabelEls = gsap.utils.toArray<Element>('[data-project-label]')
+        gsap.set(projectEls, { opacity: 0 })
+        gsap.set(projectLabelEls, { opacity: 0 })
 
-        // --- Third ring items: position via GSAP, init hidden ---
+        // --- Third ring items ---
         const thirdEls = gsap.utils.toArray<Element>('[data-third-item]')
-        thirdEls.forEach((el, i) => {
-            const angle = (i / thirdRingItems.length) * 2 * Math.PI - Math.PI / 2
-            gsap.set(el, {
-                x: Math.cos(angle) * THIRD_RADIUS,
-                y: Math.sin(angle) * THIRD_RADIUS,
-                xPercent: -50,
-                yPercent: -50,
-                opacity: 0,
-                scale: 0.5,
-                transformOrigin: '50% 50%',
-            })
-        })
+        const thirdLabelEls = gsap.utils.toArray<Element>('[data-third-label]')
+        gsap.set(thirdEls, { opacity: 0 })
+        gsap.set(thirdLabelEls, { opacity: 0 })
 
         // --- Skills scroll-scrub: appear 0–300vh ---
         const skillsTl = gsap.timeline({
@@ -145,8 +118,9 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
         skillEls.forEach((el, i) => {
-            skillsTl.to(el, { opacity: 1, scale: 1, duration: 1 }, i * (3 / skills.length))
+            skillsTl.to(el, { opacity: 1, duration: 0.5 }, i * (2.5 / skills.length))
         })
+        skillsTl.to(skillLabelEls, { opacity: 1, duration: 0.5, stagger: 0.05 }, 2.5)
 
         // Fade s2 label in when rings section enters
         ScrollTrigger.create({
@@ -184,8 +158,9 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
         projectEls.forEach((el, i) => {
-            projectsTl.to(el, { opacity: 1, scale: 1, duration: 1 }, i * (3 / introProjects.length))
+            projectsTl.to(el, { opacity: 1, duration: 0.5 }, i * (2.5 / introProjects.length))
         })
+        projectsTl.to(projectLabelEls, { opacity: 1, duration: 0.5, stagger: 0.05 }, 2.5)
 
         // --- Third ring scroll-scrub: appear 600–900vh + label crossfade ---
         ScrollTrigger.create({
@@ -212,21 +187,15 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             },
         })
         thirdEls.forEach((el, i) => {
-            thirdTl.to(el, { opacity: 1, scale: 1, duration: 1 }, i * (3 / thirdRingItems.length))
+            thirdTl.to(el, { opacity: 1, duration: 0.5 }, i * (2.5 / thirdRingItems.length))
         })
+        thirdTl.to(thirdLabelEls, { opacity: 1, duration: 0.5, stagger: 0.05 }, 2.5)
 
-        // --- Continuous orbital rotation (independent of scroll) ---
-        // Inner (skills): clockwise, items counter-rotate to stay upright
-        gsap.to('[data-skills-ring]', { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
-        gsap.to(skillEls, { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
-
-        // Middle (projects): counter-clockwise, items counter-rotate
-        gsap.to('[data-projects-ring]', { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
-        gsap.to(projectEls, { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
-
-        // Outer (third): clockwise, slower (larger circumference), items counter-rotate
-        gsap.to('[data-third-ring]', { rotation: 360, duration: 45, repeat: -1, ease: 'none' })
-        gsap.to(thirdEls, { rotation: -360, duration: 45, repeat: -1, ease: 'none' })
+        // --- Continuous orbital rotation — SVGs rotate around their center (350,350) ---
+        // Items travel with the ring; arc text readability is baked into SVG textPath structure
+        gsap.to('[data-skills-ring]',   { rotation: 360,  duration: 30, repeat: -1, ease: 'none', transformOrigin: '50% 50%' })
+        gsap.to('[data-projects-ring]', { rotation: -360, duration: 30, repeat: -1, ease: 'none', transformOrigin: '50% 50%' })
+        gsap.to('[data-third-ring]',    { rotation: 360,  duration: 45, repeat: -1, ease: 'none', transformOrigin: '50% 50%' })
 
         // --- Section 4 + CTA ---
         gsap.from('[data-s4]', {
@@ -284,19 +253,19 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                     <div className="relative h-6 flex items-center justify-center">
                         <p
                             ref={s2Ref}
-                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute opacity-0"
                         >
                             {c.s2}
                         </p>
                         <p
                             ref={s3Ref}
-                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute opacity-0"
                         >
                             {c.s3}
                         </p>
                         <p
                             ref={s4LabelRef}
-                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute opacity-0"
                         >
                             {c.s4_label}
                         </p>
