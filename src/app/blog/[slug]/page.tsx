@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAllPostsMeta, getPostBySlug } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -9,6 +10,24 @@ import rehypeShiki from "@shikijs/rehype";
 
 export async function generateStaticParams() {
     return getAllPostsMeta().map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+    const { slug } = await params;
+    try {
+        const post = getPostBySlug(slug);
+        return {
+            title: post.title,
+            description: post.description,
+            openGraph: { type: "article", title: post.title, description: post.description, publishedTime: post.date || undefined },
+        };
+    } catch {
+        return {};
+    }
 }
 
 export default async function BlogPostPage({
@@ -26,9 +45,9 @@ export default async function BlogPostPage({
     }
 
     return (
-        <main className="mx-auto max-w-3xl px-4 py-10">
+        <div className="mx-auto max-w-3xl px-4 py-10">
             <header className="mb-10">
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
                     {new Date(post.date).toLocaleDateString("en-NL", {
                         year: "numeric",
                         month: "long",
@@ -37,16 +56,16 @@ export default async function BlogPostPage({
                     · {post.readingMinutes} min read
                 </p>
 
-                <h1 className="mt-2 text-4xl font-semibold tracking-tight text-neutral-900">
+                <h1 className="mt-2 font-serif text-4xl tracking-tight text-zinc-900 dark:text-zinc-100">
                     {post.title}
                 </h1>
 
                 {post.description ? (
-                    <p className="mt-4 text-lg text-neutral-600">{post.description}</p>
+                    <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">{post.description}</p>
                 ) : null}
             </header>
 
-            <article className="prose prose-neutral max-w-none prose-pre:p-0">
+            <article className="prose prose-zinc dark:prose-invert max-w-none prose-pre:p-0">
                 <MDXRemote
                     source={post.content}
                     options={{
@@ -68,6 +87,6 @@ export default async function BlogPostPage({
                     }}
                 />
             </article>
-        </main>
+        </div>
     );
 }

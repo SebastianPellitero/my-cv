@@ -20,12 +20,12 @@ export default function SkillsRing({ radius = 120 }: { radius?: number }) {
                         }}
                     >
                         <div
-                            className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6rem] font-['DM_Mono',monospace] font-bold text-zinc-900 select-none"
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6rem] font-mono font-bold text-zinc-900 select-none"
                             style={{ backgroundColor: skill.color }}
                         >
                             {skill.abbr}
                         </div>
-                        <span className="text-[0.5rem] font-['DM_Mono',monospace] tracking-widest uppercase text-zinc-500 whitespace-nowrap">
+                        <span className="text-[0.5rem] font-mono tracking-widest uppercase text-zinc-500 whitespace-nowrap">
                             {skill.label}
                         </span>
                     </div>

@@ -1,29 +1,39 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <Link
-        href={href}
-        className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.12em] uppercase
-               text-zinc-500 hover:text-teal
+const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+    const active = usePathname()?.startsWith(href);
+    return (
+        <Link
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className="font-mono text-xs tracking-[0.12em] uppercase
+               inline-flex items-center min-h-10 px-2 sm:px-3
+               text-zinc-600 hover:text-teal-ink
                dark:text-zinc-400 dark:hover:text-teal
-               transition-colors duration-200 px-3 py-2"
-    >
-        {children}
-    </Link>
-);
+               aria-[current=page]:text-teal-ink dark:aria-[current=page]:text-teal
+               transition-colors duration-200"
+        >
+            {children}
+        </Link>
+    );
+};
 
 export default function NavBar() {
     return (
         <header className="sticky top-0 z-50
                        border-b border-zinc-200 bg-white/80 backdrop-blur
                        dark:border-zinc-800/60 dark:bg-zinc-950/70">
-            <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+            <nav aria-label="Main" className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
 
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="font-['DM_Serif_Display',serif] text-base tracking-[-0.01em]
-                     text-zinc-900 hover:text-teal
+                    aria-label="Sebastian Pellitero — home"
+                    className="font-serif text-base tracking-[-0.01em]
+                     inline-flex items-center min-h-10 min-w-10
+                     text-zinc-900 hover:text-teal-ink
                      dark:text-zinc-100 dark:hover:text-teal
                      transition-colors duration-200"
                 >
@@ -35,16 +45,14 @@ export default function NavBar() {
                     <NavLink href="/about">Experience</NavLink>
                     <NavLink href="/projects">Projects</NavLink>
                     <a
-                        href="https://www.linkedin.com/in/sebastian-pellitero/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.12em] uppercase
-                       ml-2 px-4 py-1.5 rounded-sm
-                       border border-teal text-teal
-                       hover:bg-teal hover:text-zinc-900
+                        href="mailto:sebastian.pellitero@gmail.com"
+                        className="font-mono text-xs tracking-[0.12em] uppercase
+                       inline-flex items-center min-h-10 ml-1 sm:ml-2 px-3 sm:px-4 rounded-sm
+                       border border-teal-ink text-teal-ink hover:bg-teal-ink hover:text-white
+                       dark:border-teal dark:text-teal dark:hover:bg-teal dark:hover:text-zinc-900
                        transition-colors duration-200"
                     >
-                        Hire me
+                        Email me
                     </a>
                 </div>
 

@@ -1,12 +1,10 @@
 'use client'
 
-export default function ImpressBar({ progress }: { progress: number }) {
+// Width is animated by ImpressFlow's ScrollTrigger via [data-impress-bar]
+export default function ImpressBar() {
     return (
         <div className="fixed top-0 left-0 right-0 h-[3px] z-[200] bg-zinc-800">
-            <div
-                className="h-full bg-teal"
-                style={{ width: `${progress * 100}%`, transition: 'width 0.1s linear' }}
-            />
+            <div data-impress-bar className="h-full bg-teal origin-left scale-x-0" />
         </div>
     )
 }

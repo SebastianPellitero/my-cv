@@ -48,7 +48,7 @@
 }
 
 .polaroidCaption {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.55rem;
   color: #6b5e4e;
   text-align: center;
@@ -121,7 +121,7 @@
 }
 
 .heading {
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-serif);
   font-size: clamp(2.8rem, 6vw, 5rem);
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -134,7 +134,7 @@
 }
 
 .subheading {
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-serif);
   font-size: clamp(2rem, 4vw, 3.2rem);
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -143,7 +143,7 @@
 }
 
 .year {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-accent);
   letter-spacing: 0.1em;
@@ -218,7 +218,7 @@
   right: -1rem;
   top: 50%;
   transform: translateY(-50%);
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-serif);
   font-size: clamp(6rem, 14vw, 12rem);
   color: rgba(45, 212, 191, 0.04);
   line-height: 1;
@@ -246,7 +246,7 @@
 }
 
 .statNum {
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-serif);
   font-size: 2.5rem;
   color: var(--color-teal);
   line-height: 1;
@@ -299,7 +299,7 @@
 }
 
 .logo {
-  font-family: 'DM Serif Display', serif;
+  font-family: var(--font-serif);
   font-size: 1.1rem;
   color: var(--color-teal);
   letter-spacing: -0.02em;
@@ -359,7 +359,7 @@
   align-items: center;
   gap: 0.5rem;
   animation: pulse 2s ease infinite;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 /* ─── Custom cursor ─── */
@@ -385,4 +385,39 @@
   z-index: 9998;
   transform: translate(-50%, -50%);
   opacity: 0.5;
+}
+
+/* ─── Sit below the global NavBar (h-14 + border + accent line) ─── */
+.viewport { top: 3.625rem; }
+.nav { top: calc(3.625rem + 1rem); }
+
+/* ─── Custom cursor: mouse only ─── */
+.cursor, .cursorRing { display: none; }
+@media (pointer: fine) {
+  .cursor, .cursorRing { display: block; }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .hint { animation: none; opacity: 1; }
+  .polaroid { transition: none; }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  .section {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 3.5rem 0 4.5rem;
+  }
+  .sectionInner { padding: 0 1.25rem; }
+  .introLayout,
+  .workLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .polaroidStack { display: none; }
+  .nav { left: 1.25rem; }
+  .progress { right: 0.75rem; }
+  .decoNum { display: none; }
 }

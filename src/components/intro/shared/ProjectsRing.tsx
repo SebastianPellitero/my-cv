@@ -23,7 +23,7 @@ export default function ProjectsRing({ radius = 210 }: { radius?: number }) {
                         }}
                     >
                         <div className="px-3 py-1.5 rounded-sm border border-zinc-700 bg-zinc-900/80 hover:border-teal transition-colors duration-200 whitespace-nowrap">
-                            <span className="font-['DM_Mono',monospace] text-[0.6rem] tracking-[0.08em] uppercase text-zinc-400 hover:text-teal transition-colors duration-200">
+                            <span className="font-mono text-[0.6rem] tracking-[0.08em] uppercase text-zinc-400 hover:text-teal transition-colors duration-200">
                                 {project.name}
                             </span>
                         </div>

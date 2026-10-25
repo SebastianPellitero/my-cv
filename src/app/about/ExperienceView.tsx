@@ -78,7 +78,6 @@ const SECTIONS = [
         decoNum: '02',
         photos: [
             { src: '/about/thingscubed-1.jpg', alt: 'ThingsCubed app' },
-            { src: '/about/thingscubed-2.jpg', alt: 'ThingsCubed team' },
         ],
     },
     {
@@ -97,7 +96,6 @@ const SECTIONS = [
         decoNum: '03',
         photos: [
             { src: '/about/spark-1.jpg', alt: 'Spark Digital project' },
-            { src: '/about/spark-2.jpg', alt: 'Spark Digital team' },
         ],
     },
     {
@@ -115,15 +113,13 @@ const SECTIONS = [
         tags: ['React', 'Angular', 'A/B Testing', 'CMS', 'Consultancy'],
         highlights: ['React'],
         decoNum: '04',
-        photos: [
-            { src: '/about/globant-1.jpg', alt: 'Globant office' },
-            { src: '/about/globant-2.jpg', alt: 'Globant project' },
-        ],
     },
     { id: 'next' },
 ]
 
 const TOTAL = SECTIONS.length
+
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -150,6 +146,7 @@ export default function ExperienceView() {
         const inEl = sectionRefs.current[idx]
         if (!outEl || !inEl) return
 
+        const d = reducedMotion() ? 0 : 1
         const goingForward = idx > cur
         const fromRight = idx % 2 === 1
 
@@ -179,7 +176,7 @@ export default function ExperienceView() {
                     } else {
                         hint.style.opacity = ''
                         const arrow = document.getElementById('exp-hint-arrow')
-                        if (arrow) arrow.textContent = idx + 1 % 2 === 1 ? '→' : '↓'
+                        if (arrow) arrow.textContent = (idx + 1) % 2 === 1 ? '→' : '↓'
                     }
                 }
 
@@ -190,14 +187,14 @@ export default function ExperienceView() {
             },
         })
 
-        tl.to(outEl, { x: outX, y: outY, opacity: 0.3, duration: 0.75, ease: 'power3.inOut' }, 0)
-            .to(inEl, { x: 0, y: 0, opacity: 1, duration: 0.75, ease: 'power3.inOut' }, 0)
+        tl.to(outEl, { x: outX, y: outY, opacity: 0.3, duration: 0.75 * d, ease: 'power3.inOut' }, 0)
+            .to(inEl, { x: 0, y: 0, opacity: 1, duration: 0.75 * d, ease: 'power3.inOut' }, 0)
 
         const children = inEl.querySelectorAll('[data-animate]')
         gsap.fromTo(
             children,
             { y: 20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power2.out', delay: 0.3 }
+            { y: 0, opacity: 1, duration: 0.5 * d, stagger: 0.06 * d, ease: 'power2.out', delay: 0.3 * d }
         )
     }, [])
 
@@ -211,7 +208,7 @@ export default function ExperienceView() {
 
         // Animate first section in
         const firstChildren = sectionRefs.current[0]?.querySelectorAll('[data-animate]')
-        if (firstChildren) {
+        if (firstChildren && !reducedMotion()) {
             gsap.fromTo(
                 firstChildren,
                 { y: 30, opacity: 0 },
@@ -225,10 +222,17 @@ export default function ExperienceView() {
             gsap.to(cursorRingRef.current, { left: e.clientX, top: e.clientY, duration: 0.18 })
         }
 
+        // On small screens a section can scroll itself; only change section at its edges
+        const atEdge = (forward: boolean) => {
+            const el = sectionRefs.current[currentRef.current]
+            if (!el || el.scrollHeight <= el.clientHeight) return true
+            return forward ? el.scrollTop + el.clientHeight >= el.scrollHeight - 1 : el.scrollTop <= 0
+        }
+
         // Scroll
         let wheelLock = false
         const onWheel = (e: WheelEvent) => {
-            if (wheelLock || animating.current) return
+            if (wheelLock || animating.current || !atEdge(e.deltaY > 0)) return
             wheelLock = true
             setTimeout(() => { wheelLock = false }, 900)
             if (e.deltaY > 0) goTo(currentRef.current + 1)
@@ -240,7 +244,7 @@ export default function ExperienceView() {
         const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY }
         const onTouchEnd = (e: TouchEvent) => {
             const diff = touchStartY - e.changedTouches[0].clientY
-            if (Math.abs(diff) > 40) {
+            if (Math.abs(diff) > 40 && atEdge(diff > 0)) {
                 if (diff > 0) goTo(currentRef.current + 1)
                 else goTo(currentRef.current - 1)
             }
@@ -401,9 +405,9 @@ export default function ExperienceView() {
                         <div className={s.label} data-animate style={{ justifyContent: 'center' }}>
                             What&apos;s next
                         </div>
-                        <h1 className={s.heading} data-animate style={{ textAlign: 'center' }}>
+                        <h2 className={s.heading} data-animate style={{ textAlign: 'center' }}>
                             Open to<br /><em>new challenges.</em>
-                        </h1>
+                        </h2>
                         <p className={s.body} data-animate>
                             Looking for a senior frontend role where engineering is respected,
                             the team shares knowledge openly, and the product actually matters.

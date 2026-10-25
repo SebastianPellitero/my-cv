@@ -45,8 +45,10 @@ export default function CircleButtons({ onSelect }: { onSelect: (flow: Flow) => 
         })
 
         // Slow orbit: ring rotates, each button counter-rotates to keep text upright
-        gsap.to(ringRef.current, { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
-        gsap.to(btns, { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
+        gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+            gsap.to(ringRef.current, { rotation: 360, duration: 30, repeat: -1, ease: 'none' })
+            gsap.to(btns, { rotation: -360, duration: 30, repeat: -1, ease: 'none' })
+        })
     }, { scope: containerRef })
 
     return (
@@ -61,7 +63,7 @@ export default function CircleButtons({ onSelect }: { onSelect: (flow: Flow) => 
                                    w-[150px] px-4 py-3 rounded-sm border
                                    border-zinc-700 text-zinc-300 bg-zinc-900/70
                                    hover:border-teal hover:text-teal
-                                   font-['DM_Mono',monospace] text-[0.6rem] tracking-[0.08em] uppercase leading-relaxed
+                                   font-mono text-[0.6rem] tracking-[0.08em] uppercase leading-relaxed
                                    transition-colors duration-200 backdrop-blur-sm
                                    whitespace-pre-line cursor-pointer"
                     >

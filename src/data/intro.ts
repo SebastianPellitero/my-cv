@@ -26,9 +26,9 @@ export const skills: Skill[] = [
 
 export const introProjects: IntroProject[] = [
     { name: 'my-cv', url: 'https://github.com/SebastianPellitero/my-cv' },
-    { name: 'project-2', url: 'https://github.com/SebastianPellitero' },
-    { name: 'project-3', url: 'https://github.com/SebastianPellitero' },
-    { name: 'project-4', url: 'https://github.com/SebastianPellitero' },
-    { name: 'project-5', url: 'https://github.com/SebastianPellitero' },
-    { name: 'project-6', url: 'https://github.com/SebastianPellitero' },
+    { name: 'fpv-faque', url: 'https://github.com/SebastianPellitero/fpv-faque' },
+    { name: 'wall-frame-planner', url: 'https://github.com/SebastianPellitero/wall-frame-planner' },
+    { name: 'notareasy', url: 'https://github.com/SebastianPellitero/notareasy' },
+    { name: '2-step-planner', url: 'https://github.com/SebastianPellitero/2-step-planner' },
+    { name: '3d-figurine-creator', url: 'https://github.com/SebastianPellitero/3d-figurine-creator' },
 ]

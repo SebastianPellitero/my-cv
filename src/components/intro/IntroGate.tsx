@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import EntryScreen from './EntryScreen'
@@ -18,11 +18,14 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     const [visible, setVisible] = useState(true)
     const overlayRef = useRef<HTMLDivElement>(null)
 
-    // Skip on repeat visits
-    useEffect(() => {
-        if (typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY)) {
-            setState('done')
-        }
+    // Skip on repeat visits — layout effect so the intro never paints first
+    useLayoutEffect(() => {
+        try {
+            if (localStorage.getItem(STORAGE_KEY)) {
+                setState('done')
+                setVisible(false)
+            }
+        } catch { } // storage blocked: just show the intro
     }, [])
 
     // Lock body scroll while intro is active
@@ -51,9 +54,9 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     }
 
     const handleDone = () => {
-        if (typeof localStorage !== 'undefined') {
+        try {
             localStorage.setItem(STORAGE_KEY, '1')
-        }
+        } catch { } // storage blocked: intro shows again next visit
         setState('done')
     }
 
@@ -64,9 +67,12 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
                 {children}
             </div>
 
-            {/* Intro overlay */}
-            {visible && state !== 'done' && (
-                <div ref={overlayRef} className="fixed inset-0 z-[100] bg-zinc-950">
+            {/* Intro overlay — stays mounted while it fades out */}
+            {visible && (
+                <div
+                    ref={overlayRef}
+                    className={`fixed inset-0 z-[100] bg-zinc-950 ${state === 'done' ? 'pointer-events-none' : ''}`}
+                >
 
                     {state === 'entry' && (
                         <EntryScreen onSelect={handleFlowSelect} />
@@ -85,16 +91,18 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
                     )}
 
                     {/* Skip button */}
-                    <button
-                        onClick={handleDone}
-                        className="fixed bottom-6 right-6 z-[150]
-                                   font-['DM_Mono',monospace] text-[0.6rem] tracking-[0.1em] uppercase
-                                   text-zinc-600 hover:text-zinc-400 transition-colors duration-200
-                                   cursor-pointer"
-                        style={{ animation: 'fadeIn 0.4s ease 1s both' }}
-                    >
-                        Skip →
-                    </button>
+                    {state !== 'done' && (
+                        <button
+                            onClick={handleDone}
+                            className="fixed bottom-6 right-6 z-[150]
+                                       font-mono text-[0.6rem] tracking-[0.1em] uppercase
+                                       text-zinc-600 hover:text-zinc-400 transition-colors duration-200
+                                       cursor-pointer"
+                            style={{ animation: 'fadeIn 0.4s ease 1s both' }}
+                        >
+                            Skip →
+                        </button>
+                    )}
                 </div>
             )}
 

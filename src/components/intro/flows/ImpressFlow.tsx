@@ -50,28 +50,33 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
     const allRingsRef = useRef<HTMLDivElement>(null)
     const s2Ref = useRef<HTMLParagraphElement>(null)
     const s3Ref = useRef<HTMLParagraphElement>(null)
-    const [progress, setProgress] = useState(0)
+    const [ringScale, setRingScale] = useState(1)
 
     const c = formal ? copy.formal : copy.default
     const textClass = formal
         ? 'font-serif text-stone-100'
-        : "font-['DM_Serif_Display',serif] text-zinc-100"
+        : "font-serif text-zinc-100"
     const bgClass = formal ? 'bg-neutral-950' : 'bg-zinc-950'
 
-    // Progress bar via native scroll
+    // Fit the 500px rings into small viewports, and refit on resize / rotation
     useEffect(() => {
-        const el = scrollerRef.current!
-        const onScroll = () => {
-            const max = el.scrollHeight - el.clientHeight
-            if (max > 0) setProgress(el.scrollTop / max)
-        }
-        el.addEventListener('scroll', onScroll, { passive: true })
-        return () => el.removeEventListener('scroll', onScroll)
+        const fit = () => setRingScale(Math.min(1, (Math.min(window.innerWidth, window.innerHeight) - 80) / 500))
+        fit()
+        window.addEventListener('resize', fit)
+        return () => window.removeEventListener('resize', fit)
     }, [])
 
     useGSAP(() => {
         const scroller = scrollerRef.current!
-        const vh = window.innerHeight
+        // Functions so ScrollTrigger re-reads the height on resize
+        const vh3 = () => window.innerHeight * 3
+
+        // Progress bar, driven by scroll without React re-renders
+        gsap.to('[data-impress-bar]', {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: { scroller, start: 0, end: 'max', scrub: true },
+        })
 
         // Section 1: animate text in on mount
         gsap.from('[data-s1]', { opacity: 0, y: 20, duration: 1, delay: 0.3 })
@@ -89,8 +94,9 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                 scroller,
                 trigger: allRingsRef.current,
                 start: 'top top',
-                end: `+=${vh * 3}`,
+                end: () => `+=${vh3()}`,
                 scrub: 0.5,
+                invalidateOnRefresh: true,
             },
         })
         skillEls.forEach((el, i) => {
@@ -112,7 +118,7 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
         ScrollTrigger.create({
             scroller,
             trigger: allRingsRef.current,
-            start: `top+=${vh * 3} top`,
+            start: () => `top+=${vh3()} top`,
             onEnter: () => {
                 gsap.to(s2Ref.current, { opacity: 0, y: -8, duration: 0.4 })
                 gsap.to(s3Ref.current, { opacity: 1, y: 0, duration: 0.4 })
@@ -131,9 +137,10 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
             scrollTrigger: {
                 scroller,
                 trigger: allRingsRef.current,
-                start: `top+=${vh * 3} top`,
-                end: `+=${vh * 3}`,
+                start: () => `top+=${vh3()} top`,
+                end: () => `+=${vh3()}`,
                 scrub: 0.5,
+                invalidateOnRefresh: true,
             },
         })
         projectEls.forEach((el, i) => {
@@ -179,7 +186,7 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                 />
             )}
 
-            <ImpressBar progress={progress} />
+            <ImpressBar />
 
             {/* Section 1 — intro text */}
             <div className={`h-screen flex items-center justify-center px-8 ${bgClass}`}>
@@ -197,13 +204,13 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                     <div className="relative h-6 flex items-center justify-center">
                         <p
                             ref={s2Ref}
-                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                            className="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
                         >
                             {c.s2}
                         </p>
                         <p
                             ref={s3Ref}
-                            className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
+                            className="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-teal absolute"
                         >
                             {c.s3}
                         </p>
@@ -215,7 +222,7 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                         style={{
                             width: 500,
                             height: 500,
-                            transform: `scale(${typeof window !== 'undefined' ? Math.min(1, (Math.min(window.innerWidth, window.innerHeight) - 80) / 500) : 1})`,
+                            transform: `scale(${ringScale})`,
                             transformOrigin: 'center center',
                         }}
                     >
@@ -237,7 +244,7 @@ export default function ImpressFlow({ formal = false, onDone }: Props) {
                 <button
                     data-cta
                     onClick={onDone}
-                    className="font-['DM_Mono',monospace] text-[0.75rem] tracking-[0.15em] uppercase
+                    className="font-mono text-[0.75rem] tracking-[0.15em] uppercase
                                px-8 py-4 border border-teal text-teal
                                hover:bg-teal hover:text-zinc-900
                                transition-colors duration-300 cursor-pointer"

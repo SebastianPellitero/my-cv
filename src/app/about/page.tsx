@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import ExperienceView from './ExperienceView'
 
 export const metadata: Metadata = {
-  title: 'Experience — Sebastian Pellitero',
+  title: 'Experience',
   description: 'Nine years building the web. Senior Frontend Developer specialising in React & TypeScript.',
 }
 

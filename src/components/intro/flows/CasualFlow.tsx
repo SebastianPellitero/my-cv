@@ -15,7 +15,7 @@ export default function CasualFlow({ onDone }: { onDone: () => void }) {
         <div ref={ref} className="flex items-center justify-center h-full">
             <p
                 data-casual-text
-                className="font-['DM_Serif_Display',serif] text-3xl sm:text-5xl text-zinc-100"
+                className="font-serif text-3xl sm:text-5xl text-zinc-100"
             >
                 Cool, enjoy. ✌
             </p>

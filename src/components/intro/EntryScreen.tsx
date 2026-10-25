@@ -20,10 +20,10 @@ export default function EntryScreen({ onSelect }: { onSelect: (flow: Flow) => vo
     return (
         <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-4">
             <div data-entry-msg className="text-center mb-16">
-                <h1 className="font-['DM_Serif_Display',serif] text-4xl sm:text-5xl text-zinc-100 leading-tight">
+                <h1 className="font-serif text-4xl sm:text-5xl text-zinc-100 leading-tight">
                     Hey, glad you could make it.
                 </h1>
-                <p className="font-['DM_Mono',monospace] text-[0.7rem] tracking-[0.15em] uppercase text-zinc-500 mt-3">
+                <p className="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-zinc-500 mt-3">
                     What brings you here?
                 </p>
             </div>

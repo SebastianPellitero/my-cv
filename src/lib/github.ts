@@ -82,7 +82,7 @@ export async function getPublicRepos(): Promise<Repo[]> {
 
     const repos: any[] = await res.json()
 
-    return repos.map((r): Repo => ({
+    return repos.filter((r) => !r.fork).map((r): Repo => ({
         name: r.name,
         description: r.description ?? null,
         url: r.html_url,
