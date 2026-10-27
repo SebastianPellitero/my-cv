@@ -1,6 +1,5 @@
 'use client'
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import EntryScreen from './EntryScreen'
 import ImpressFlow from './flows/ImpressFlow'
@@ -9,29 +8,11 @@ import FormalFlow from './flows/FormalFlow'
 export type Flow = 'casual' | 'impress' | 'formal'
 type IntroState = 'entry' | 'flow' | 'done' | 'fading'
 
-const STORAGE_KEY = 'intro-seen'
-
-// alwaysShow: ignore and don't write `intro-seen`. finishHref: after the fade, replace the URL with this route.
-// Both are used by /intro, which plays the intro over the home page and then lands on "/".
-export default function IntroGate({ children, alwaysShow = false, finishHref }: {
-    children: React.ReactNode
-    alwaysShow?: boolean
-    finishHref?: string
-}) {
-    const router = useRouter()
+// Plays the intro over the home page on every visit, then fades to reveal it.
+export default function IntroGate({ children }: { children: React.ReactNode }) {
     const [state, setState] = useState<IntroState>('entry')
     const [flow, setFlow] = useState<Flow | null>(null)
     const overlayRef = useRef<HTMLDivElement>(null)
-
-    // Skip on repeat visits — layout effect so the intro never paints first
-    useLayoutEffect(() => {
-        if (alwaysShow) return
-        try {
-            if (localStorage.getItem(STORAGE_KEY)) {
-                setState('done')
-            }
-        } catch { } // storage blocked: just show the intro
-    }, [alwaysShow])
 
     // Lock body scroll while intro is active
     useEffect(() => {
@@ -47,20 +28,11 @@ export default function IntroGate({ children, alwaysShow = false, finishHref }: 
     }
 
     function handleDone() {
-        if (!alwaysShow) {
-            try {
-                localStorage.setItem(STORAGE_KEY, '1')
-            } catch { } // storage blocked: intro shows again next visit
-        }
         setState('fading')
         gsap.to(overlayRef.current, {
             opacity: 0,
             duration: 0.5,
-            onComplete: () => {
-                setState('done')
-                // replace, so Back doesn't return to the intro
-                if (finishHref) router.replace(finishHref)
-            },
+            onComplete: () => setState('done'),
         })
     }
 
@@ -103,6 +75,16 @@ export default function IntroGate({ children, alwaysShow = false, finishHref }: 
                     )}
                 </div>
             )}
+
+            {/* Without JS the intro can't animate or be dismissed, so reveal it unanimated */}
+            <noscript>
+                <style>{`
+                    [data-entry-msg], [data-circle-btn] {
+                        opacity: 1 !important;
+                        transform: none !important;
+                    }
+                `}</style>
+            </noscript>
 
             <style>{`
                 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }

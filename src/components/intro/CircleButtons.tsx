@@ -19,13 +19,22 @@ export default function CircleButtons({ onSelect }: { onSelect: (flow: Flow) => 
     useGSAP(() => {
         const btns = gsap.utils.toArray<HTMLElement>('[data-circle-btn]')
 
-        gsap.from(btns, {
-            opacity: 0,
-            scale: 0.7,
-            duration: 0.5,
-            stagger: 0.15,
+        // Animates *to* visible — the markup renders at opacity 0 so the pre-JS frame
+        // never shows the buttons before they've been placed on the ellipse.
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+        // Tailwind v4 writes the standalone `scale:`/`translate:` properties, which compose
+        // with GSAP's `transform` instead of being overridden by it. Clear them so GSAP owns
+        // the transform outright, re-seeding the start state it animates from.
+        gsap.set(btns, { clearProps: 'scale,translate', scale: 0.7 })
+
+        gsap.to(btns, {
+            opacity: 1,
+            scale: 1,
+            duration: reduced ? 0 : 0.5,
+            stagger: reduced ? 0 : 0.15,
             ease: 'back.out(1.4)',
-            delay: 0.8,
+            delay: reduced ? 0 : 0.8,
         })
 
         gsap.matchMedia().add(
@@ -41,7 +50,14 @@ export default function CircleButtons({ onSelect }: { onSelect: (flow: Flow) => 
                     const ry = Math.min(210, window.innerHeight / 2 - 60)
                     btns.forEach((el, i) => {
                         const a = (BUTTONS[i].angle * Math.PI) / 180 + orbit.t
-                        gsap.set(el, { x: Math.cos(a) * rx, y: Math.sin(a) * ry, xPercent: -50, yPercent: -50 })
+                        gsap.set(el, {
+                            x: Math.cos(a) * rx,
+                            y: Math.sin(a) * ry,
+                            // Centre each button on its orbit point; heights differ because
+                            // some labels wrap, so percentages beat a fixed margin.
+                            xPercent: -50,
+                            yPercent: -50,
+                        })
                     })
                 }
                 place()
@@ -76,6 +92,7 @@ export default function CircleButtons({ onSelect }: { onSelect: (flow: Flow) => 
                     data-circle-btn
                     onClick={() => onSelect(btn.id)}
                     className="flex w-full max-w-[260px] items-center justify-center text-center
+                               opacity-0 scale-[0.7] motion-reduce:opacity-100 motion-reduce:scale-100
                                sm:absolute sm:left-1/2 sm:top-1/2 sm:w-[180px]
                                px-5 py-3.5 rounded-lg border border-zinc-600 bg-zinc-800 text-zinc-100
                                shadow-lg shadow-black/50
