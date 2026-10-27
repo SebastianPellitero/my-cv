@@ -18,9 +18,9 @@ export default function EntryScreen({ onSelect }: { onSelect: (flow: Flow) => vo
     }, { scope: containerRef })
 
     return (
-        <div ref={containerRef} className="flex flex-col items-center justify-center h-full gap-4">
-            <div data-entry-msg className="text-center mb-16">
-                <h1 className="font-serif text-4xl sm:text-5xl text-zinc-100 leading-tight">
+        <div ref={containerRef} className="relative flex flex-col items-center justify-center h-full gap-10 px-6">
+            <div data-entry-msg className="text-center">
+                <h1 className="font-serif text-3xl sm:text-4xl text-zinc-100 leading-tight">
                     Hey, glad you could make it.
                 </h1>
                 <p className="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-zinc-500 mt-3">

@@ -1,52 +1,58 @@
-export type Skill = {
+import {
+    type SimpleIcon,
+    siReact, siTypescript, siNextdotjs, siRedux, siReactquery, siAngular, siVuedotjs,
+    siCss, siTailwindcss, siJest, siGraphql, siNodedotjs, siPython, siOpenjdk, siDotnet,
+    siPostgresql, siDocker, siOllama, siRaspberrypi, siGit, siW3schools, siClaude, siApachespark,
+} from 'simple-icons'
+
+// One item on an orbit ring: a simple-icons logo, an image in /public, or (neither) a lettered badge
+export type OrbitItem = {
     label: string
     abbr: string
-    color: string
-    iconKey: string
+    icon?: SimpleIcon
+    img?: string
 }
 
-export type IntroProject = {
-    name: string
-    url: string
-}
-
-export type ThirdRingItem = {
-    id: string
-    label: string
-    url?: string
-}
-
-export const skills: Skill[] = [
-    { label: 'React',      abbr: 'Re', color: '#61dafb', iconKey: 'react'       },
-    { label: 'TypeScript', abbr: 'TS', color: '#3178c6', iconKey: 'typescript'  },
-    { label: 'Next.js',    abbr: 'Nx', color: '#e2e8f0', iconKey: 'nextdotjs'   },
-    { label: 'CSS',        abbr: 'CS', color: '#563d7c', iconKey: 'css'         },
-    { label: 'Tailwind',   abbr: 'Tw', color: '#38bdf8', iconKey: 'tailwindcss' },
-    { label: 'Testing',    abbr: 'Jt', color: '#99425b', iconKey: 'jest'        },
-    { label: 'GraphQL',    abbr: 'GQ', color: '#e10098', iconKey: 'graphql'     },
-    { label: 'Node.js',    abbr: 'No', color: '#68a063', iconKey: 'nodedotjs'   },
-    { label: 'Go',         abbr: 'Go', color: '#00ADD8', iconKey: 'go'          },
-    { label: 'PostgreSQL', abbr: 'PG', color: '#336791', iconKey: 'postgresql'  },
-    { label: 'Git',        abbr: 'Gt', color: '#F05032', iconKey: 'git'         },
-    { label: 'A11y',       abbr: 'Ac', color: '#2dd4bf', iconKey: 'w3schools'   },
+export const skills: OrbitItem[] = [
+    { label: 'React',          abbr: 'Re', icon: siReact },
+    { label: 'TypeScript',     abbr: 'TS', icon: siTypescript },
+    { label: 'Next.js',        abbr: 'Nx', icon: siNextdotjs },
+    { label: 'React Native',   abbr: 'RN', icon: siReact },
+    { label: 'Redux',          abbr: 'Rx', icon: siRedux },
+    { label: 'TanStack Query', abbr: 'TQ', icon: siReactquery },
+    { label: 'Angular',        abbr: 'Ng', icon: siAngular },
+    { label: 'Vue',            abbr: 'Vu', icon: siVuedotjs },
+    { label: 'CSS',            abbr: 'CS', icon: siCss },
+    { label: 'Tailwind',       abbr: 'Tw', icon: siTailwindcss },
+    { label: 'Testing',        abbr: 'Jt', icon: siJest },
+    { label: 'GraphQL',        abbr: 'GQ', icon: siGraphql },
+    { label: 'Node.js',        abbr: 'No', icon: siNodedotjs },
+    { label: 'Python',         abbr: 'Py', icon: siPython },
+    { label: 'Java',           abbr: 'Jv', icon: siOpenjdk },
+    { label: '.NET',           abbr: 'Nt', icon: siDotnet },
+    { label: 'PostgreSQL',     abbr: 'PG', icon: siPostgresql },
+    { label: 'Docker',         abbr: 'Dk', icon: siDocker },
+    { label: 'AWS',            abbr: 'AW', img: '/intro/aws.png' },
+    { label: 'Azure',          abbr: 'Az', img: '/intro/azure.svg' }, // from devicon (MIT); simple-icons dropped Microsoft brands
+    { label: 'Ollama',         abbr: 'Ol', icon: siOllama },
+    { label: 'Raspberry Pi',   abbr: 'Pi', icon: siRaspberrypi },
+    { label: 'Git',            abbr: 'Gt', icon: siGit },
+    { label: 'A11y',           abbr: 'Ac', icon: siW3schools },
 ]
 
-export const introProjects: IntroProject[] = [
-    { name: 'my-cv', url: 'https://github.com/SebastianPellitero/my-cv' },
-    { name: 'fpv-faque', url: 'https://github.com/SebastianPellitero/fpv-faque' },
-    { name: 'wall-frame-planner', url: 'https://github.com/SebastianPellitero/wall-frame-planner' },
-    { name: 'notareasy', url: 'https://github.com/SebastianPellitero/notareasy' },
-    { name: '2-step-planner', url: 'https://github.com/SebastianPellitero/2-step-planner' },
-    { name: '3d-figurine-creator', url: 'https://github.com/SebastianPellitero/3d-figurine-creator' },
+// Logos are the companies' site icons (Spark Digital's from its old wordmark); none found for ThingsCubed yet
+export const companies: OrbitItem[] = [
+    { label: 'Foleon',        abbr: 'Fo', img: '/intro/foleon.png' },
+    { label: 'ThingsCubed',   abbr: 'TC' },
+    { label: 'Spark Digital', abbr: 'SD', img: '/intro/sparkdigital.png' },
+    { label: 'Globant',       abbr: 'G',  img: '/intro/globant.png' },
+    { label: 'GlobalLogic',   abbr: 'GL', img: '/intro/globallogic.png' },
 ]
 
-export const thirdRingItems: ThirdRingItem[] = [
-    { id: 'item-1', label: '' },
-    { id: 'item-2', label: '' },
-    { id: 'item-3', label: '' },
-    { id: 'item-4', label: '' },
-    { id: 'item-5', label: '' },
-    { id: 'item-6', label: '' },
-    { id: 'item-7', label: '' },
-    { id: 'item-8', label: '' },
+// What I'm working on right now (inner ring)
+export const learning: OrbitItem[] = [
+    { label: 'WAS exam (A11y cert)', abbr: 'WAS', img: '/intro/iaap-was.png' },
+    { label: 'Python',               abbr: 'Py', icon: siPython },
+    { label: 'Data engineer path',   abbr: 'DE', icon: siApachespark },
+    { label: 'Claude courses',       abbr: 'Cl', icon: siClaude },
 ]

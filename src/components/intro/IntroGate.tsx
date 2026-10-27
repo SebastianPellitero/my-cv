@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import gsap from 'gsap'
 import EntryScreen from './EntryScreen'
-import CasualFlow from './flows/CasualFlow'
 import ImpressFlow from './flows/ImpressFlow'
 import FormalFlow from './flows/FormalFlow'
 
@@ -11,19 +11,27 @@ type IntroState = 'entry' | 'flow' | 'done' | 'fading'
 
 const STORAGE_KEY = 'intro-seen'
 
-export default function IntroGate({ children }: { children: React.ReactNode }) {
+// alwaysShow: ignore and don't write `intro-seen`. finishHref: after the fade, replace the URL with this route.
+// Both are used by /intro, which plays the intro over the home page and then lands on "/".
+export default function IntroGate({ children, alwaysShow = false, finishHref }: {
+    children: React.ReactNode
+    alwaysShow?: boolean
+    finishHref?: string
+}) {
+    const router = useRouter()
     const [state, setState] = useState<IntroState>('entry')
     const [flow, setFlow] = useState<Flow | null>(null)
     const overlayRef = useRef<HTMLDivElement>(null)
 
     // Skip on repeat visits — layout effect so the intro never paints first
     useLayoutEffect(() => {
+        if (alwaysShow) return
         try {
             if (localStorage.getItem(STORAGE_KEY)) {
                 setState('done')
             }
         } catch { } // storage blocked: just show the intro
-    }, [])
+    }, [alwaysShow])
 
     // Lock body scroll while intro is active
     useEffect(() => {
@@ -32,25 +40,34 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     }, [state])
 
     const handleFlowSelect = (selected: Flow) => {
+        // "Just browsing" goes straight to the page
+        if (selected === 'casual') return handleDone()
         setFlow(selected)
         setState('flow')
     }
 
-    const handleDone = () => {
-        try {
-            localStorage.setItem(STORAGE_KEY, '1')
-        } catch { } // storage blocked: intro shows again next visit
+    function handleDone() {
+        if (!alwaysShow) {
+            try {
+                localStorage.setItem(STORAGE_KEY, '1')
+            } catch { } // storage blocked: intro shows again next visit
+        }
         setState('fading')
         gsap.to(overlayRef.current, {
             opacity: 0,
             duration: 0.5,
-            onComplete: () => setState('done'),
+            onComplete: () => {
+                setState('done')
+                // replace, so Back doesn't return to the intro
+                if (finishHref) router.replace(finishHref)
+            },
         })
     }
 
     return (
         <>
-            <div style={{ visibility: state === 'done' ? 'visible' : 'hidden' }}>
+            {/* Visible from the start of the fade, so the overlay fades away to reveal it */}
+            <div style={{ visibility: state === 'done' || state === 'fading' ? 'visible' : 'hidden' }}>
                 {children}
             </div>
 
@@ -62,10 +79,6 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
 
                     {state === 'entry' && (
                         <EntryScreen onSelect={handleFlowSelect} />
-                    )}
-
-                    {state === 'flow' && flow === 'casual' && (
-                        <CasualFlow onDone={handleDone} />
                     )}
 
                     {state === 'flow' && flow === 'impress' && (
