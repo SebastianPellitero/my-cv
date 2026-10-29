@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 112" role="img" aria-label="ThingsCubed">
+  <!-- Three isometric cubes in a trefoil, matching the ThingsCubed mark.
+       Unit cube, half-width 26, half-height 15, side depth 30. Each cube is
+       shrunk about its own centre so the group reads as three distinct solids
+       with the background showing through between them. -->
+  <g fill-rule="evenodd">
+    <!-- top cube, apex (52, 0), centre (52, 30) -->
+    <g transform="translate(52 30) scale(0.88) translate(-52 -30)">
+      <path d="M52 0 78 15 52 30 26 15z" fill="#0b72b4"/>
+      <path d="M26 15 52 30v30L26 45z" fill="#0b72b4"/>
+      <path d="M78 15 52 30v30l26-15z" fill="#113b5c"/>
+    </g>
+
+    <!-- bottom-left cube, apex (26, 45), centre (26, 75) -->
+    <g transform="translate(26 75) scale(0.88) translate(-26 -75)">
+      <path d="M26 45 52 60 26 75 0 60z" fill="#0b72b4"/>
+      <path d="M0 60l26 15v30L0 90z" fill="#0b72b4"/>
+      <path d="M52 60 26 75v30l26-15z" fill="#113b5c"/>
+    </g>
+
+    <!-- bottom-right cube, apex (78, 45), centre (78, 75) -->
+    <g transform="translate(78 75) scale(0.88) translate(-78 -75)">
+      <path d="M78 45l26 15-26 15-26-15z" fill="#0b72b4"/>
+      <path d="M52 60l26 15v30L52 90z" fill="#0b72b4"/>
+      <path d="M104 60 78 75v30l26-15z" fill="#113b5c"/>
+    </g>
+  </g>
+</svg>

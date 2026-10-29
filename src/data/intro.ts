@@ -40,10 +40,11 @@ export const skills: OrbitItem[] = [
     { label: 'A11y',           abbr: 'Ac', icon: siW3schools },
 ]
 
-// Logos are the companies' site icons (Spark Digital's from its old wordmark); none found for ThingsCubed yet
+// Logos are the companies' site icons (Spark Digital's from its old wordmark;
+// ThingsCubed's redrawn as SVG so it sits on the light tile without its dark backdrop)
 export const companies: OrbitItem[] = [
     { label: 'Foleon',        abbr: 'Fo', img: '/intro/foleon.png' },
-    { label: 'ThingsCubed',   abbr: 'TC' },
+    { label: 'ThingsCubed',   abbr: 'TC', img: '/intro/thingscubed.svg' },
     { label: 'Spark Digital', abbr: 'SD', img: '/intro/sparkdigital.png' },
     { label: 'Globant',       abbr: 'G',  img: '/intro/globant.png' },
     { label: 'GlobalLogic',   abbr: 'GL', img: '/intro/globallogic.png' },
