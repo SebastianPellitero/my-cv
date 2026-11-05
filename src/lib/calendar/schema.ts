@@ -1,0 +1,93 @@
+import { z } from "zod"
+import { amsterdamToUtc, CALENDAR_TIMEZONE } from "./time"
+
+export const LINK_TTL_SECONDS = 1_209_600 // 14 days
+
+export const calendarIdSchema = z.uuid()
+
+const utcDateTime = z.iso.datetime()
+
+const storedCalendarSchema = z.object({
+    id: calendarIdSchema,
+    title: z.string().min(1),
+    note: z.string().optional(),
+    timezone: z.literal(CALENDAR_TIMEZONE),
+    createdAt: utcDateTime,
+    expiresAt: utcDateTime,
+    slots: z.array(z.object({ start: utcDateTime, end: utcDateTime })).min(1),
+})
+
+export type StoredCalendar = z.infer<typeof storedCalendarSchema>
+
+// A missing key and unreadable data both mean the link is gone
+export function parseStoredCalendar(raw: unknown): StoredCalendar | null {
+    const result = storedCalendarSchema.safeParse(raw)
+    return result.success ? result.data : null
+}
+
+const calendarInputSchema = z.object({
+    title: z.string().trim().min(1, "Enter a title.").max(120, "Keep the title under 120 characters."),
+    note: z.string().trim().max(280, "Keep the note under 280 characters.").optional(),
+    slots: z
+        .array(
+            z.object({
+                date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a date."),
+                start: z.string().regex(/^\d{2}:\d{2}$/, "Enter a start time."),
+                end: z.string().regex(/^\d{2}:\d{2}$/, "Enter an end time."),
+            })
+        )
+        .min(1, "Add at least one slot.")
+        .max(20, "Add 20 slots at most."),
+})
+
+export type CalendarInput = {
+    title: string
+    note?: string
+    slots: StoredCalendar["slots"]
+}
+
+// Keys are field paths such as "title" or "slots.0.end"
+export type FieldErrors = Record<string, string>
+
+export type ParsedCalendarInput =
+    | { ok: true; data: CalendarInput }
+    | { ok: false; fieldErrors: FieldErrors }
+
+// Form times are Europe/Amsterdam wall-clock values; the result is in UTC
+export function parseCalendarInput(raw: unknown, now = new Date()): ParsedCalendarInput {
+    const result = calendarInputSchema.safeParse(raw)
+    if (!result.success) {
+        const fieldErrors: FieldErrors = {}
+        for (const issue of result.error.issues) {
+            fieldErrors[issue.path.join(".") || "form"] ??= issue.message
+        }
+        return { ok: false, fieldErrors }
+    }
+
+    const fieldErrors: FieldErrors = {}
+    const slots: CalendarInput["slots"] = []
+
+    result.data.slots.forEach((slot, index) => {
+        const start = amsterdamToUtc(slot.date, slot.start)
+        const end = amsterdamToUtc(slot.date, slot.end)
+
+        if (!start) fieldErrors[`slots.${index}.start`] = "That time doesn't exist on this date."
+        if (!end) fieldErrors[`slots.${index}.end`] = "That time doesn't exist on this date."
+        if (!start || !end) return
+
+        if (end <= start) {
+            fieldErrors[`slots.${index}.end`] = "End time must be after the start time."
+        } else if (start <= now) {
+            fieldErrors[`slots.${index}.start`] = "This slot must be in the future."
+        } else {
+            slots.push({ start: start.toISOString(), end: end.toISOString() })
+        }
+    })
+
+    if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
+
+    return {
+        ok: true,
+        data: { title: result.data.title, note: result.data.note || undefined, slots },
+    }
+}

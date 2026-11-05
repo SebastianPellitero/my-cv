@@ -1,6 +1,6 @@
 import "./globals.css";
 import NavBar from "@/components/NavBar";
-import { Analytics } from "@vercel/analytics/react";
+import SiteAnalytics from "@/components/SiteAnalytics";
 import { Metadata } from "next";
 import { DM_Mono, DM_Serif_Display } from "next/font/google";
 
@@ -38,7 +38,7 @@ export default function RootLayout({
                 <main>
                     {children}
                 </main>
-                <Analytics />
+                <SiteAnalytics />
             </body>
         </html>
     );
