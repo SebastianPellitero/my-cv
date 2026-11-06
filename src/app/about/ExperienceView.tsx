@@ -113,6 +113,13 @@ const SECTIONS = [
         tags: ['React', 'Angular', 'A/B Testing', 'CMS', 'Consultancy'],
         highlights: ['React'],
         decoNum: '04',
+        photos: [
+            { src: '/about/globant-1.jpg', alt: 'Globant team' },
+            { src: '/about/globallogic-1.jpg', alt: 'GlobalLogic setup' },
+            { src: '/about/globant-2.jpg', alt: 'Globant office' },
+            { src: '/about/globant-3.jpg', alt: 'Globant teammates' },
+            { src: '/about/globant-4.jpg', alt: 'Globant workshop' },
+        ],
     },
     { id: 'next' },
 ]

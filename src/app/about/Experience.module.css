@@ -29,10 +29,15 @@
   cursor: default;
 }
 
+/* A bigger stack needs a second column, and the text has to make room for it */
+.polaroidStack:has(> :nth-child(4)) { width: 310px; }
+
 /* Stack each polaroid with a small offset */
 .polaroid:nth-child(1) { top: -45px;  left: 0px; z-index: 3; }
 .polaroid:nth-child(2) { top: 55px;  left: 50px;  z-index: 2; }
 .polaroid:nth-child(3) { top: 160px; left: 0px;  z-index: 1; }
+.polaroid:nth-child(4) { top: -15px; left: 135px; z-index: 0; }
+.polaroid:nth-child(5) { top: 140px; left: 145px; z-index: 0; }
 
 .polaroid:hover {
   transform: rotate(0deg) scale(1.05);
