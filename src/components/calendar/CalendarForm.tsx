@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { startTransition, useActionState, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { createCalendarLink, type CreateLinkState } from "@/app/admin/calendar/actions";
 import CopyButton from "./CopyButton";
@@ -54,14 +55,28 @@ function Field({ id, label, value, error, type = "text", multiline = false, onCh
     );
 }
 
-export default function CalendarForm({ origin }: { origin: string }) {
-    const baseId = useId();
-    const [state, formAction, pending] = useActionState(createCalendarLink, initialState);
+type EditTarget = {
+    action: (state: CreateLinkState, input: unknown) => Promise<CreateLinkState>;
+    title: string;
+    note: string;
+    slotMinutes: number;
+    currentSlots: string[];
+};
 
-    const [title, setTitle] = useState("");
-    const [note, setNote] = useState("");
+type Props = {
+    origin?: string;
+    edit?: EditTarget;
+};
+
+export default function CalendarForm({ origin, edit }: Props) {
+    const baseId = useId();
+    const [state, formAction, pending] = useActionState(edit?.action ?? createCalendarLink, initialState);
+
+    const [title, setTitle] = useState(edit?.title ?? "");
+    const [note, setNote] = useState(edit?.note ?? "");
     const [halfHour, setHalfHour] = useState(false);
-    const [slots, setSlots] = useState<SlotRow[]>([{ key: 0, date: "", start: "", end: "" }]);
+    // An edit can change just the text, so it starts with no ranges
+    const [slots, setSlots] = useState<SlotRow[]>(edit ? [] : [{ key: 0, date: "", start: "", end: "" }]);
     const [announcement, setAnnouncement] = useState("");
 
     // Errors point at positions in the list as submitted, which may shift when rows are removed
@@ -74,6 +89,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
 
     const errors = state.status === "error" ? state.fieldErrors : {};
     const formError = errors.form ?? errors.slots;
+    const slotMinutes = edit?.slotMinutes ?? (halfHour ? 30 : 60);
 
     const slotInputId = (key: number, name: SlotField) => `${baseId}-slot-${key}-${name}`;
 
@@ -108,7 +124,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
             formAction({
                 title,
                 note,
-                slotMinutes: halfHour ? 30 : 60,
+                slotMinutes,
                 slots: slots.map(({ date, start, end }) => ({ date, start, end })),
             })
         );
@@ -133,7 +149,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
                 id="create-link-heading"
                 className="mb-4 font-mono text-xs tracking-[0.15em] uppercase text-teal-ink dark:text-teal"
             >
-                Create a link
+                {edit ? "Link details" : "Create a link"}
             </h2>
 
             <form ref={formRef} onSubmit={submit} noValidate className="grid gap-6">
@@ -153,19 +169,30 @@ export default function CalendarForm({ origin }: { origin: string }) {
                     onChange={setNote}
                 />
 
-                <label className="flex cursor-pointer items-center gap-3 font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                    <input
-                        type="checkbox"
-                        checked={halfHour}
-                        onChange={(event) => setHalfHour(event.target.checked)}
-                        className={`h-5 w-5 shrink-0 cursor-pointer accent-teal-ink dark:accent-teal ${focusRing}`}
-                    />
-                    The appointment is only 30 minutes
-                </label>
+                {edit ? (
+                    <div>
+                        <p className={fieldLabel}>Current slots</p>
+                        <ul className="grid gap-1 font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                            {edit.currentSlots.map((label) => (
+                                <li key={label}>{label}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : (
+                    <label className="flex cursor-pointer items-center gap-3 font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                        <input
+                            type="checkbox"
+                            checked={halfHour}
+                            onChange={(event) => setHalfHour(event.target.checked)}
+                            className={`h-5 w-5 shrink-0 cursor-pointer accent-teal-ink dark:accent-teal ${focusRing}`}
+                        />
+                        The appointment is only 30 minutes
+                    </label>
+                )}
 
                 <p className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    Enter ranges in Amsterdam time. Each one is shown to the visitor as{" "}
-                    {halfHour ? "30-minute" : "1-hour"} slots.
+                    {edit ? "Add more ranges" : "Enter ranges"} in Amsterdam time. Each one is shown to the visitor as{" "}
+                    {slotMinutes === 30 ? "30-minute" : "1-hour"} slots.
                 </p>
 
                 {slots.map((row, position) => (
@@ -186,7 +213,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
                                 />
                             ))}
                         </div>
-                        {slots.length > 1 && (
+                        {(edit || slots.length > 1) && (
                             <button
                                 type="button"
                                 onClick={() => removeSlot(row.key, position + 1)}
@@ -203,8 +230,13 @@ export default function CalendarForm({ origin }: { origin: string }) {
                         Add range
                     </button>
                     <button type="submit" disabled={pending} className={primaryButton}>
-                        {pending ? "Creating" : "Create link"}
+                        {edit ? (pending ? "Saving" : "Save changes") : pending ? "Creating" : "Create link"}
                     </button>
+                    {edit && (
+                        <Link href="/admin/calendar" className={secondaryButton}>
+                            Cancel
+                        </Link>
+                    )}
                 </div>
 
                 <div role="alert">{formError && <p className={errorText}>Error: {formError}</p>}</div>

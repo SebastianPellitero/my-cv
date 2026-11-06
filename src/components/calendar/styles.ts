@@ -23,4 +23,6 @@ export const fieldLabel = "block mb-1 font-mono text-xs tracking-[0.1em] upperca
 
 export const errorText = "font-mono text-xs text-red-700 dark:text-red-400";
 
-export const card = "rounded-2xl border p-6 border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/40";
+export const pageHeading = "font-serif text-4xl sm:text-5xl leading-[1.1] tracking-[-0.02em] text-zinc-900 dark:text-zinc-100 mb-8";
+
+export const card ="rounded-2xl border p-6 border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/40";

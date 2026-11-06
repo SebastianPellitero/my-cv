@@ -9,8 +9,13 @@ import {
     requireAdmin,
     startAdminSession,
 } from "@/lib/admin-auth";
-import { calendarIdSchema, parseCalendarInput, type FieldErrors } from "@/lib/calendar/schema";
-import { createCalendar, deleteCalendar } from "@/lib/calendar/store";
+import {
+    calendarIdSchema,
+    parseCalendarEdit,
+    parseCalendarInput,
+    type FieldErrors,
+} from "@/lib/calendar/schema";
+import { createCalendar, deleteCalendar, getCalendar, updateCalendar } from "@/lib/calendar/store";
 import { formatExpiry } from "@/lib/calendar/time";
 
 export type LoginState = { error?: string };
@@ -51,6 +56,34 @@ export async function createCalendarLink(_state: CreateLinkState, input: unknown
     } catch {
         return { status: "error", fieldErrors: { form: "The link couldn't be saved. Try again." } };
     }
+}
+
+export async function updateCalendarLink(
+    id: unknown,
+    _state: CreateLinkState,
+    input: unknown
+): Promise<CreateLinkState> {
+    await requireAdmin();
+
+    const gone: CreateLinkState = { status: "error", fieldErrors: { form: "This link has expired or was deleted." } };
+    const parsedId = calendarIdSchema.safeParse(id);
+    if (!parsedId.success) return gone;
+
+    try {
+        const calendar = await getCalendar(parsedId.data);
+        if (!calendar) return gone;
+
+        const parsed = parseCalendarEdit(input, calendar);
+        if (!parsed.ok) return { status: "error", fieldErrors: parsed.fieldErrors };
+
+        if (!(await updateCalendar(calendar, parsed.data))) return gone;
+    } catch {
+        return { status: "error", fieldErrors: { form: "The changes couldn't be saved. Try again." } };
+    }
+
+    revalidatePath(ADMIN_PATH);
+    revalidatePath(`/calendar/${parsedId.data}`);
+    redirect(ADMIN_PATH);
 }
 
 export async function deleteCalendarLink(id: unknown): Promise<void> {

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { deleteCalendarLink } from "@/app/admin/calendar/actions";
 import CopyButton from "./CopyButton";
@@ -70,6 +71,13 @@ export default function ActiveLinks({ origin, links }: Props) {
                                 </div>
                                 <code className="font-mono text-xs break-all text-zinc-700 dark:text-zinc-300">{url}</code>
                                 <div className="flex flex-wrap items-center gap-3">
+                                    <Link
+                                        href={`/admin/calendar/${link.id}`}
+                                        aria-label={`Edit ${link.title}`}
+                                        className={secondaryButton}
+                                    >
+                                        Edit
+                                    </Link>
                                     <button
                                         type="button"
                                         disabled={pending}

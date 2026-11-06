@@ -41,6 +41,17 @@ export async function createCalendar(input: CalendarInput, now = new Date()): Pr
     return calendar
 }
 
+// Keeps the link's expiry, and returns false instead of bringing back a link that has gone
+export async function updateCalendar(calendar: StoredCalendar, input: CalendarInput): Promise<boolean> {
+    const saved = await getRedis().set(
+        `${KEY_PREFIX}${calendar.id}`,
+        { ...calendar, ...input },
+        { exat: Math.floor(Date.parse(calendar.expiresAt) / 1000), xx: true }
+    )
+
+    return saved !== null
+}
+
 // Shared between generateMetadata and the page so one request makes one read
 export const getCalendar = cache(async (id: string): Promise<StoredCalendar | null> => {
     if (!calendarIdSchema.safeParse(id).success) return null

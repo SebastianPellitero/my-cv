@@ -24,6 +24,12 @@ export function splitIntoSlots(start: Date, end: Date, slotMinutes: number): Cal
     return slots
 }
 
+// The length isn't stored, so it's read back from the link's slots
+export function getSlotMinutes(slots: CalendarSlot[]): 30 | 60 {
+    const [first] = slots
+    return first && Date.parse(first.end) - Date.parse(first.start) === 30 * 60_000 ? 30 : 60
+}
+
 export function formatDay(iso: string): string {
     return formatInTimeZone(iso, CALENDAR_TIMEZONE, "EEEE d MMMM")
 }

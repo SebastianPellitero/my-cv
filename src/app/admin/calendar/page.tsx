@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import ActiveLinks from "@/components/calendar/ActiveLinks";
 import CalendarForm from "@/components/calendar/CalendarForm";
 import LoginForm from "@/components/calendar/LoginForm";
+import { pageHeading } from "@/components/calendar/styles";
 import { isAdmin } from "@/lib/admin-auth";
 import { getPicks, listCalendars } from "@/lib/calendar/store";
 import { formatExpiry, formatSlot } from "@/lib/calendar/time";
@@ -22,12 +23,10 @@ async function getOrigin() {
 }
 
 export default async function AdminCalendarPage() {
-    const heading = "font-serif text-4xl sm:text-5xl leading-[1.1] tracking-[-0.02em] text-zinc-900 dark:text-zinc-100 mb-8";
-
     if (!(await isAdmin())) {
         return (
             <div className="mx-auto max-w-md px-6 py-16">
-                <h1 className={heading}>Sign in</h1>
+                <h1 className={pageHeading}>Sign in</h1>
                 <LoginForm />
             </div>
         );
@@ -49,7 +48,7 @@ export default async function AdminCalendarPage() {
 
     return (
         <div className="mx-auto max-w-3xl px-6 py-16">
-            <h1 className={heading}>Calendar links</h1>
+            <h1 className={pageHeading}>Calendar links</h1>
             <CalendarForm origin={origin} />
             <ActiveLinks origin={origin} links={links} />
         </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { amsterdamToUtc, formatSlot, groupSlotsByDay, splitIntoSlots } from "./time"
+import { amsterdamToUtc, formatSlot, getSlotMinutes, groupSlotsByDay, splitIntoSlots } from "./time"
 
 const slot = (start: string, end: string) => ({ start, end })
 
@@ -63,6 +63,17 @@ describe("splitIntoSlots", () => {
 
     it("returns nothing for a range shorter than a slot", () => {
         expect(splitIntoSlots(at("2026-11-10T09:00:00.000Z"), at("2026-11-10T09:59:00.000Z"), 60)).toEqual([])
+    })
+})
+
+describe("getSlotMinutes", () => {
+    it("recognises half-hour links", () => {
+        expect(getSlotMinutes([slot("2026-11-10T09:00:00.000Z", "2026-11-10T09:30:00.000Z")])).toBe(30)
+    })
+
+    it("treats anything else as hourly, including older links", () => {
+        expect(getSlotMinutes([slot("2026-11-10T09:00:00.000Z", "2026-11-10T10:00:00.000Z")])).toBe(60)
+        expect(getSlotMinutes([slot("2026-11-10T09:00:00.000Z", "2026-11-10T09:45:00.000Z")])).toBe(60)
     })
 })
 

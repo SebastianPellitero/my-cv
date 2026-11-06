@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseCalendarInput, parseStoredCalendar } from "./schema"
+import { parseCalendarEdit, parseCalendarInput, parseStoredCalendar } from "./schema"
 
 const stored = {
     id: "3f2b8c1e-7a4d-4e6f-9b1a-2c3d4e5f6a7b",
@@ -144,5 +144,75 @@ describe("parseCalendarInput", () => {
     it("rejects a list with no slots", () => {
         const result = parseCalendarInput({ title: "x", slots: [] }, now)
         expect(result).toEqual({ ok: false, fieldErrors: { slots: "Add at least one range." } })
+    })
+})
+
+describe("parseCalendarEdit", () => {
+    const now = new Date("2026-11-05T12:00:00.000Z")
+    const calendar = parseStoredCalendar(stored)!
+    const range = { date: "2026-11-10", start: "14:00", end: "16:00" }
+
+    it("changes the text and keeps the slots when no ranges are added", () => {
+        const result = parseCalendarEdit({ title: " Coolblue ", note: "Fixed typo", slots: [] }, calendar, now)
+
+        expect(result).toEqual({
+            ok: true,
+            data: { title: "Coolblue", note: "Fixed typo", slots: calendar.slots },
+        })
+    })
+
+    it("clears the note when it's emptied", () => {
+        const result = parseCalendarEdit({ title: "x", note: "", slots: [] }, { ...calendar, note: "Old" }, now)
+        expect(result.ok && result.data.note).toBeUndefined()
+    })
+
+    it("adds new slots after the existing ones, so picks keep pointing at the same slot", () => {
+        const earlier = { date: "2026-11-09", start: "09:00", end: "10:00" }
+        const result = parseCalendarEdit({ title: "x", slots: [earlier] }, calendar, now)
+
+        expect(result.ok && result.data.slots).toEqual([
+            ...calendar.slots,
+            { start: "2026-11-09T08:00:00.000Z", end: "2026-11-09T09:00:00.000Z" },
+        ])
+    })
+
+    it("uses the link's own slot length, ignoring what the form sends", () => {
+        const halfHour = {
+            ...calendar,
+            slots: [{ start: "2026-11-10T09:00:00.000Z", end: "2026-11-10T09:30:00.000Z" }],
+        }
+        const result = parseCalendarEdit(
+            { title: "x", slotMinutes: 60, slots: [{ ...range, end: "15:00" }] },
+            halfHour,
+            now
+        )
+
+        expect(result.ok && result.data.slots.slice(1)).toEqual([
+            { start: "2026-11-10T13:00:00.000Z", end: "2026-11-10T13:30:00.000Z" },
+            { start: "2026-11-10T13:30:00.000Z", end: "2026-11-10T14:00:00.000Z" },
+        ])
+    })
+
+    it("rejects a range that overlaps a slot already on the link", () => {
+        const result = parseCalendarEdit(
+            { title: "x", slots: [{ ...range, start: "10:30", end: "11:30" }] },
+            calendar,
+            now
+        )
+        expect(result).toEqual({
+            ok: false,
+            fieldErrors: { "slots.0.start": "This range overlaps another one." },
+        })
+    })
+
+    it("rejects an empty title and a range in the past", () => {
+        expect(parseCalendarEdit({ title: "", slots: [] }, calendar, now)).toEqual({
+            ok: false,
+            fieldErrors: { title: "Enter a title." },
+        })
+        expect(parseCalendarEdit({ title: "x", slots: [{ ...range, date: "2026-11-01" }] }, calendar, now)).toEqual({
+            ok: false,
+            fieldErrors: { "slots.0.start": "This range must be in the future." },
+        })
     })
 })
