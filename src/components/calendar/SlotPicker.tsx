@@ -2,15 +2,25 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { pickSlot } from "@/app/calendar/[id]/actions";
-import LocalSlotTime from "./LocalSlotTime";
-import { card, errorText, focusRing, inlineLink, primaryButton, secondaryButton } from "./styles";
+import {
+    card,
+    currentSlot,
+    errorText,
+    focusRing,
+    inlineLink,
+    primaryButton,
+    secondaryButton,
+    selectedSlotButton,
+    slotButton,
+} from "./styles";
+import { formatVisitorTime, isSameTime, useVisitorZone } from "./VisitorTime";
 
 export type PickerSlot = {
     index: number;
     label: string;
-    timeRange: string;
+    time: string;
+    endTime: string;
     start: string;
-    end: string;
 };
 
 export type PickerDay = {
@@ -23,6 +33,8 @@ type Props = {
     id: string;
     days: PickerDay[];
     pickedIndex: number | null;
+    slotMinutes: number;
+    // The timezone the slots are listed in, to detect a visitor who is already in it
     timezone: string;
     contactEmail: string;
 };
@@ -32,8 +44,9 @@ const changeIntroId = "pick-change-intro";
 
 const smallLabel = "font-mono text-xs tracking-[0.1em] uppercase text-zinc-600 dark:text-zinc-400";
 
-export default function SlotPicker({ id, days, pickedIndex, timezone, contactEmail }: Props) {
+export default function SlotPicker({ id, days, pickedIndex, slotMinutes, timezone, contactEmail }: Props) {
     const router = useRouter();
+    const zone = useVisitorZone();
     const [changing, setChanging] = useState(false);
     const [confirming, setConfirming] = useState<number | null>(null);
     const [problem, setProblem] = useState<"limited" | "error" | null>(null);
@@ -42,6 +55,7 @@ export default function SlotPicker({ id, days, pickedIndex, timezone, contactEma
 
     const allSlots = days.flatMap((day) => day.slots);
     const picked = allSlots.find((slot) => slot.index === pickedIndex);
+    const showLocalTimes = zone !== null && !allSlots.every((slot) => isSameTime(slot.start, zone, timezone));
 
     // Each step replaces the focused control, so focus moves to what took its place.
     // After a pick the target arrives with the server's update, a render or two later.
@@ -159,94 +173,103 @@ export default function SlotPicker({ id, days, pickedIndex, timezone, contactEma
                 )}
             </div>
 
-            {days.map((day) => (
-                <section key={day.key} aria-labelledby={`day-${day.key}`} className="mb-10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <span className="inline-block w-4 h-px bg-teal" />
-                        <h2
-                            id={`day-${day.key}`}
-                            className="font-mono text-xs tracking-[0.15em] uppercase text-teal-ink dark:text-teal"
-                        >
-                            {day.label}
-                        </h2>
-                    </div>
-                    <ul className="grid gap-4">
-                        {day.slots.map((slot) => {
-                            const isCurrent = slot.index === pickedIndex;
-                            const isConfirming = slot.index === confirming;
+            <div className="mb-8">
+                {/* min-height holds the space the visitor's zone fills in after hydration */}
+                <div className="min-h-12">
+                    {zone ? (
+                        <>
+                            <p className={smallLabel}>Your time ({zone.replaceAll("_", " ")})</p>
+                            <p className="mt-1 font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                                {showLocalTimes ? "Shown under each Amsterdam time" : "Same as Amsterdam time"}
+                            </p>
+                        </>
+                    ) : (
+                        <p className="font-mono text-sm text-zinc-900 dark:text-zinc-100">Times are in Amsterdam time</p>
+                    )}
+                </div>
+                <p className="mt-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                    Each slot lasts {slotMinutes === 30 ? "30 minutes" : "1 hour"}.
+                </p>
+            </div>
 
-                            return (
-                                <li key={slot.index} className={`${card} grid gap-4`}>
-                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                        {/* min-height holds the space LocalSlotTime fills in after hydration */}
-                                        <dl className="grid flex-1 gap-3 min-h-28 sm:min-h-12 sm:grid-cols-2">
-                                            <div>
-                                                <dt className={smallLabel}>Amsterdam time</dt>
-                                                <dd className="mt-1 font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                                                    {slot.timeRange}
-                                                </dd>
+            {days.map((day) => {
+                const confirmingSlot = day.slots.find((slot) => slot.index === confirming);
+
+                return (
+                    <section key={day.key} aria-labelledby={`day-${day.key}`} className="mb-8">
+                        <div className="flex items-center gap-3 mb-3">
+                            <span className="inline-block w-4 h-px bg-teal" />
+                            <h2
+                                id={`day-${day.key}`}
+                                className="font-mono text-xs tracking-[0.15em] uppercase text-teal-ink dark:text-teal"
+                            >
+                                {day.label}
+                            </h2>
+                        </div>
+                        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                            {day.slots.map((slot) => {
+                                const local = showLocalTimes && formatVisitorTime(slot.start, zone, timezone);
+                                const isConfirming = slot.index === confirming;
+
+                                return (
+                                    <li key={slot.index}>
+                                        {slot.index === pickedIndex ? (
+                                            <div className={currentSlot}>
+                                                <span>{slot.time}</span>
+                                                <span className="text-xs">Current pick</span>
                                             </div>
-                                            <LocalSlotTime start={slot.start} end={slot.end} timezone={timezone} />
-                                        </dl>
-                                        <div className="flex flex-wrap gap-2 sm:flex-col sm:shrink-0">
-                                            {isCurrent ? (
-                                                <p className={`${smallLabel} py-3`}>Your current pick</p>
-                                            ) : (
-                                                !isConfirming && (
-                                                    <button
-                                                        id={`pick-${slot.index}`}
-                                                        type="button"
-                                                        disabled={pending}
-                                                        aria-label={`Pick this slot: ${slot.label}`}
-                                                        onClick={() => openConfirm(slot)}
-                                                        className={primaryButton}
-                                                    >
-                                                        Pick this slot
-                                                    </button>
-                                                )
-                                            )}
-                                            <a
-                                                href={`/calendar/${id}/slot/${slot.index}`}
-                                                download
-                                                aria-label={`Add to calendar: ${slot.label}`}
-                                                className={secondaryButton}
+                                        ) : (
+                                            <button
+                                                id={`pick-${slot.index}`}
+                                                type="button"
+                                                disabled={pending}
+                                                aria-pressed={isConfirming}
+                                                onClick={() => openConfirm(slot)}
+                                                className={isConfirming ? selectedSlotButton : slotButton}
                                             >
-                                                Add to calendar
-                                            </a>
-                                        </div>
-                                    </div>
+                                                <span className="sr-only">Pick this slot: {day.label}, </span>
+                                                <span>{slot.time}</span>
+                                                <span className="sr-only">
+                                                    {" "}
+                                                    to {slot.endTime}
+                                                    {local && ", your time "}
+                                                </span>
+                                                {local && <span className="text-xs">{local}</span>}
+                                            </button>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
 
-                                    {isConfirming && (
-                                        <div className="flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-                                            <p className="w-full font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                                                Confirm {slot.label}?
-                                            </p>
-                                            <button
-                                                id={`confirm-${slot.index}`}
-                                                type="button"
-                                                disabled={pending}
-                                                aria-label={`Confirm: ${slot.label}`}
-                                                onClick={() => confirm(slot)}
-                                                className={primaryButton}
-                                            >
-                                                {pending ? "Sending" : "Confirm"}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                disabled={pending}
-                                                onClick={() => cancelConfirm(slot)}
-                                                className={secondaryButton}
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    )}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </section>
-            ))}
+                        {confirmingSlot && (
+                            <div className={`${card} mt-3 flex flex-wrap items-center gap-3`}>
+                                <p className="w-full font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                                    Confirm {confirmingSlot.label}?
+                                </p>
+                                <button
+                                    id={`confirm-${confirmingSlot.index}`}
+                                    type="button"
+                                    disabled={pending}
+                                    aria-label={`Confirm: ${confirmingSlot.label}`}
+                                    onClick={() => confirm(confirmingSlot)}
+                                    className={primaryButton}
+                                >
+                                    {pending ? "Sending" : "Confirm"}
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={pending}
+                                    onClick={() => cancelConfirm(confirmingSlot)}
+                                    className={secondaryButton}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                );
+            })}
         </>
     );
 }

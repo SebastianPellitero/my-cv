@@ -8,6 +8,7 @@ import {
     formatExpiry,
     formatSlot,
     formatTime,
+    getSlotMinutes,
     groupSlotsByDay,
 } from "@/lib/calendar/time";
 
@@ -57,9 +58,9 @@ export default async function CalendarPage({ params }: Props) {
         slots: day.slots.map(({ slot, index }) => ({
             index,
             label: formatSlot(slot),
-            timeRange: `${formatTime(slot.start)} – ${formatTime(slot.end)}`,
+            time: formatTime(slot.start),
+            endTime: formatTime(slot.end),
             start: slot.start,
-            end: slot.end,
         })),
     }));
 
@@ -98,6 +99,7 @@ export default async function CalendarPage({ params }: Props) {
                 id={calendar.id}
                 days={days}
                 pickedIndex={pick?.slotIndex ?? null}
+                slotMinutes={getSlotMinutes(calendar.slots)}
                 timezone={CALENDAR_TIMEZONE}
                 contactEmail={contactEmail}
             />

@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { amsterdamToUtc, CALENDAR_TIMEZONE, getSlotMinutes, splitIntoSlots } from "./time"
 
-export const LINK_TTL_SECONDS = 1_209_600 // 14 days
+export const LINK_TTL_SECONDS = 1_814_400 // 21 days
 
 export const calendarIdSchema = z.uuid()
 

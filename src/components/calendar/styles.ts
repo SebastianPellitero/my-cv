@@ -12,7 +12,16 @@ export const secondaryButton = `${buttonBase} border border-teal-ink text-teal-i
     hover:bg-teal-ink hover:text-white
     dark:border-teal dark:text-teal dark:hover:bg-teal dark:hover:text-zinc-900`;
 
-export const inlineLink = `border-b pb-0.5 text-teal-ink border-teal-ink hover:opacity-60
+const slotChip = "w-full flex-col py-2 text-sm! tracking-normal!";
+
+export const slotButton = `${secondaryButton} ${slotChip}`;
+
+export const selectedSlotButton = `${primaryButton} ${slotChip}`;
+
+export const currentSlot = `flex min-h-10 w-full flex-col items-center justify-center rounded-sm py-2
+    border border-dashed border-zinc-500 font-mono text-sm text-zinc-700 dark:text-zinc-300`;
+
+export const inlineLink =`border-b pb-0.5 text-teal-ink border-teal-ink hover:opacity-60
     dark:text-teal dark:border-teal transition-opacity motion-reduce:transition-none ${focusRing}`;
 
 export const field = `block w-full min-h-10 px-3 py-2 rounded-sm border border-zinc-500
