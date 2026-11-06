@@ -43,6 +43,68 @@ describe("parseCalendarInput", () => {
         })
     })
 
+    it("splits a range into 1-hour slots", () => {
+        const result = parseCalendarInput({ title: "x", slots: [{ ...slot, end: "13:00" }] }, now)
+
+        expect(result.ok && result.data.slots).toEqual([
+            { start: "2026-11-10T09:00:00.000Z", end: "2026-11-10T10:00:00.000Z" },
+            { start: "2026-11-10T10:00:00.000Z", end: "2026-11-10T11:00:00.000Z" },
+            { start: "2026-11-10T11:00:00.000Z", end: "2026-11-10T12:00:00.000Z" },
+        ])
+    })
+
+    it("splits a range into half hours when asked", () => {
+        const result = parseCalendarInput({ title: "x", slotMinutes: 30, slots: [slot] }, now)
+
+        expect(result.ok && result.data.slots).toEqual([
+            { start: "2026-11-10T09:00:00.000Z", end: "2026-11-10T09:30:00.000Z" },
+            { start: "2026-11-10T09:30:00.000Z", end: "2026-11-10T10:00:00.000Z" },
+        ])
+    })
+
+    it("rejects any other slot length", () => {
+        const result = parseCalendarInput({ title: "x", slotMinutes: 1, slots: [slot] }, now)
+        expect(result.ok).toBe(false)
+    })
+
+    it("rejects a range shorter than half an hour on a half-hour link", () => {
+        const result = parseCalendarInput(
+            { title: "x", slotMinutes: 30, slots: [{ ...slot, end: "10:15" }] },
+            now
+        )
+        expect(result).toEqual({
+            ok: false,
+            fieldErrors: { "slots.0.end": "A range must be at least 30 minutes long." },
+        })
+    })
+
+    it("rejects a range shorter than an hour", () => {
+        const result = parseCalendarInput({ title: "x", slots: [{ ...slot, end: "10:30" }] }, now)
+        expect(result).toEqual({
+            ok: false,
+            fieldErrors: { "slots.0.end": "A range must be at least 1 hour long." },
+        })
+    })
+
+    it("rejects overlapping ranges", () => {
+        const result = parseCalendarInput(
+            { title: "x", slots: [{ ...slot, end: "12:00" }, { ...slot, start: "11:00", end: "13:00" }] },
+            now
+        )
+        expect(result).toEqual({
+            ok: false,
+            fieldErrors: { "slots.1.start": "This range overlaps another one." },
+        })
+    })
+
+    it("allows a range that starts when the previous one ends", () => {
+        const result = parseCalendarInput(
+            { title: "x", slots: [slot, { ...slot, start: "11:00", end: "12:00" }] },
+            now
+        )
+        expect(result.ok && result.data.slots).toHaveLength(2)
+    })
+
     it("reports a missing title and bad slot fields by path", () => {
         const result = parseCalendarInput({ title: "", slots: [{ ...slot, date: "" }] }, now)
 
@@ -64,7 +126,7 @@ describe("parseCalendarInput", () => {
         const result = parseCalendarInput({ title: "x", slots: [{ ...slot, date: "2026-11-01" }] }, now)
         expect(result).toEqual({
             ok: false,
-            fieldErrors: { "slots.0.start": "This slot must be in the future." },
+            fieldErrors: { "slots.0.start": "This range must be in the future." },
         })
     })
 
@@ -81,6 +143,6 @@ describe("parseCalendarInput", () => {
 
     it("rejects a list with no slots", () => {
         const result = parseCalendarInput({ title: "x", slots: [] }, now)
-        expect(result).toEqual({ ok: false, fieldErrors: { slots: "Add at least one slot." } })
+        expect(result).toEqual({ ok: false, fieldErrors: { slots: "Add at least one range." } })
     })
 })

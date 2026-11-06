@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { amsterdamToUtc, formatSlot, groupSlotsByDay } from "./time"
+import { amsterdamToUtc, formatSlot, groupSlotsByDay, splitIntoSlots } from "./time"
 
 const slot = (start: string, end: string) => ({ start, end })
 
@@ -28,6 +28,41 @@ describe("amsterdamToUtc", () => {
 
     it("rejects a date that doesn't exist", () => {
         expect(amsterdamToUtc("2026-02-31", "10:00")).toBeNull()
+    })
+})
+
+describe("splitIntoSlots", () => {
+    const at = (iso: string) => new Date(iso)
+
+    it("keeps a range of exactly one slot as one slot", () => {
+        expect(splitIntoSlots(at("2026-11-10T09:00:00.000Z"), at("2026-11-10T10:00:00.000Z"), 60)).toEqual([
+            slot("2026-11-10T09:00:00.000Z", "2026-11-10T10:00:00.000Z"),
+        ])
+    })
+
+    it("divides a range into half hours", () => {
+        expect(splitIntoSlots(at("2026-11-10T09:00:00.000Z"), at("2026-11-10T10:00:00.000Z"), 30)).toEqual([
+            slot("2026-11-10T09:00:00.000Z", "2026-11-10T09:30:00.000Z"),
+            slot("2026-11-10T09:30:00.000Z", "2026-11-10T10:00:00.000Z"),
+        ])
+    })
+
+    it("drops time left over at the end", () => {
+        expect(splitIntoSlots(at("2026-11-10T09:00:00.000Z"), at("2026-11-10T11:30:00.000Z"), 60)).toEqual([
+            slot("2026-11-10T09:00:00.000Z", "2026-11-10T10:00:00.000Z"),
+            slot("2026-11-10T10:00:00.000Z", "2026-11-10T11:00:00.000Z"),
+        ])
+    })
+
+    it("keeps the range's starting minutes", () => {
+        expect(splitIntoSlots(at("2026-11-10T09:30:00.000Z"), at("2026-11-10T11:30:00.000Z"), 60)).toEqual([
+            slot("2026-11-10T09:30:00.000Z", "2026-11-10T10:30:00.000Z"),
+            slot("2026-11-10T10:30:00.000Z", "2026-11-10T11:30:00.000Z"),
+        ])
+    })
+
+    it("returns nothing for a range shorter than a slot", () => {
+        expect(splitIntoSlots(at("2026-11-10T09:00:00.000Z"), at("2026-11-10T09:59:00.000Z"), 60)).toEqual([])
     })
 })
 

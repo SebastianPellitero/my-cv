@@ -21,7 +21,7 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     }, [state])
 
     const handleFlowSelect = (selected: Flow) => {
-        // "Just browsing" goes straight to the page
+        // "Skip intro" goes straight to the page
         if (selected === 'casual') return handleDone()
         setFlow(selected)
         setState('flow')

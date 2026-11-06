@@ -8,7 +8,7 @@ type Button = { id: Flow; label: string; angle: number }
 
 const BUTTONS: Button[] = [
     { id: 'impress', label: "I'm here to see\nif I'll hire you", angle: 270 },
-    { id: 'casual', label: 'Just browsing', angle: 30 },
+    { id: 'casual', label: 'Skip intro', angle: 30 },
     { id: 'formal', label: "Let's be formal\nabout this", angle: 150 },
 ]
 

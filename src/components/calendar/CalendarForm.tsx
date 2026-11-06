@@ -1,8 +1,8 @@
 "use client";
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { createCalendarLink, type CreateLinkState } from "@/app/admin/calendar/actions";
 import CopyButton from "./CopyButton";
-import { card, errorText, field, fieldLabel, primaryButton, secondaryButton } from "./styles";
+import { card, errorText, field, fieldLabel, focusRing, primaryButton, secondaryButton } from "./styles";
 
 type SlotField = "date" | "start" | "end";
 type SlotRow = Record<SlotField, string> & { key: number };
@@ -58,9 +58,9 @@ export default function CalendarForm({ origin }: { origin: string }) {
     const baseId = useId();
     const [state, formAction, pending] = useActionState(createCalendarLink, initialState);
 
-    // Controlled so React's post-action form reset can't wipe the fields after a validation error
     const [title, setTitle] = useState("");
     const [note, setNote] = useState("");
+    const [halfHour, setHalfHour] = useState(false);
     const [slots, setSlots] = useState<SlotRow[]>([{ key: 0, date: "", start: "", end: "" }]);
     const [announcement, setAnnouncement] = useState("");
 
@@ -88,7 +88,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
 
     function addSlot() {
         const key = nextKey.current++;
-        // A new row usually shares the previous slot's day
+        // A new row usually shares the previous range's day
         const date = slots[slots.length - 1]?.date ?? "";
         setSlots((rows) => [...rows, { key, date, start: "", end: "" }]);
         pendingFocusId.current = slotInputId(key, "date");
@@ -96,17 +96,22 @@ export default function CalendarForm({ origin }: { origin: string }) {
 
     function removeSlot(key: number, position: number) {
         setSlots((rows) => rows.filter((row) => row.key !== key));
-        setAnnouncement(`Slot ${position} removed`);
+        setAnnouncement(`Range ${position} removed`);
         addButtonRef.current?.focus();
     }
 
-    function submit() {
+    // Submits through onSubmit because a form action resets the form, which unticks the checkbox after an error
+    function submit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         setSubmittedKeys(slots.map((row) => row.key));
-        formAction({
-            title,
-            note,
-            slots: slots.map(({ date, start, end }) => ({ date, start, end })),
-        });
+        startTransition(() =>
+            formAction({
+                title,
+                note,
+                slotMinutes: halfHour ? 30 : 60,
+                slots: slots.map(({ date, start, end }) => ({ date, start, end })),
+            })
+        );
     }
 
     useEffect(() => {
@@ -131,7 +136,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
                 Create a link
             </h2>
 
-            <form ref={formRef} action={submit} noValidate className="grid gap-6">
+            <form ref={formRef} onSubmit={submit} noValidate className="grid gap-6">
                 <Field
                     id={`${baseId}-title`}
                     label="Title"
@@ -148,14 +153,25 @@ export default function CalendarForm({ origin }: { origin: string }) {
                     onChange={setNote}
                 />
 
+                <label className="flex cursor-pointer items-center gap-3 font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                    <input
+                        type="checkbox"
+                        checked={halfHour}
+                        onChange={(event) => setHalfHour(event.target.checked)}
+                        className={`h-5 w-5 shrink-0 cursor-pointer accent-teal-ink dark:accent-teal ${focusRing}`}
+                    />
+                    The appointment is only 30 minutes
+                </label>
+
                 <p className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    Enter slot times in Amsterdam time.
+                    Enter ranges in Amsterdam time. Each one is shown to the visitor as{" "}
+                    {halfHour ? "30-minute" : "1-hour"} slots.
                 </p>
 
                 {slots.map((row, position) => (
                     <fieldset key={row.key} className={card}>
                         <legend className="px-2 font-mono text-xs tracking-[0.15em] uppercase text-teal-ink dark:text-teal">
-                            Slot {position + 1}
+                            Range {position + 1}
                         </legend>
                         <div className="grid gap-4 sm:grid-cols-3">
                             {slotFields.map(({ name, label, type }) => (
@@ -176,7 +192,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
                                 onClick={() => removeSlot(row.key, position + 1)}
                                 className={`${secondaryButton} mt-4`}
                             >
-                                Remove<span className="sr-only"> slot {position + 1}</span>
+                                Remove<span className="sr-only"> range {position + 1}</span>
                             </button>
                         )}
                     </fieldset>
@@ -184,7 +200,7 @@ export default function CalendarForm({ origin }: { origin: string }) {
 
                 <div className="flex flex-wrap items-center gap-3">
                     <button ref={addButtonRef} type="button" onClick={addSlot} className={secondaryButton}>
-                        Add slot
+                        Add range
                     </button>
                     <button type="submit" disabled={pending} className={primaryButton}>
                         {pending ? "Creating" : "Create link"}

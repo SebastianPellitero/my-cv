@@ -12,6 +12,18 @@ export function amsterdamToUtc(date: string, time: string): Date | null {
     return formatInTimeZone(utc, CALENDAR_TIMEZONE, "yyyy-MM-dd'T'HH:mm:ss") === local ? utc : null
 }
 
+// Time left over at the end of a range is dropped, since a full slot doesn't fit in it
+export function splitIntoSlots(start: Date, end: Date, slotMinutes: number): CalendarSlot[] {
+    const slots: CalendarSlot[] = []
+    const length = slotMinutes * 60_000
+
+    for (let at = start.getTime(); at + length <= end.getTime(); at += length) {
+        slots.push({ start: new Date(at).toISOString(), end: new Date(at + length).toISOString() })
+    }
+
+    return slots
+}
+
 export function formatDay(iso: string): string {
     return formatInTimeZone(iso, CALENDAR_TIMEZONE, "EEEE d MMMM")
 }

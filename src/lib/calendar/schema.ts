@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { amsterdamToUtc, CALENDAR_TIMEZONE } from "./time"
+import { amsterdamToUtc, CALENDAR_TIMEZONE, splitIntoSlots } from "./time"
 
 export const LINK_TTL_SECONDS = 1_209_600 // 14 days
 
@@ -25,9 +25,24 @@ export function parseStoredCalendar(raw: unknown): StoredCalendar | null {
     return result.success ? result.data : null
 }
 
+const storedPickSchema = z.object({
+    slotIndex: z.number().int().min(0),
+    pickedAt: utcDateTime,
+})
+
+export type StoredPick = z.infer<typeof storedPickSchema>
+
+export const slotIndexSchema = storedPickSchema.shape.slotIndex
+
+export function parseStoredPick(raw: unknown): StoredPick | null {
+    const result = storedPickSchema.safeParse(raw)
+    return result.success ? result.data : null
+}
+
 const calendarInputSchema = z.object({
     title: z.string().trim().min(1, "Enter a title.").max(120, "Keep the title under 120 characters."),
     note: z.string().trim().max(280, "Keep the note under 280 characters.").optional(),
+    slotMinutes: z.literal([30, 60]).default(60),
     slots: z
         .array(
             z.object({
@@ -36,8 +51,8 @@ const calendarInputSchema = z.object({
                 end: z.string().regex(/^\d{2}:\d{2}$/, "Enter an end time."),
             })
         )
-        .min(1, "Add at least one slot.")
-        .max(20, "Add 20 slots at most."),
+        .min(1, "Add at least one range.")
+        .max(20, "Add 20 ranges at most."),
 })
 
 export type CalendarInput = {
@@ -53,7 +68,7 @@ export type ParsedCalendarInput =
     | { ok: true; data: CalendarInput }
     | { ok: false; fieldErrors: FieldErrors }
 
-// Form times are Europe/Amsterdam wall-clock values; the result is in UTC
+// Form times are Europe/Amsterdam wall-clock ranges; the result is fixed-length slots in UTC
 export function parseCalendarInput(raw: unknown, now = new Date()): ParsedCalendarInput {
     const result = calendarInputSchema.safeParse(raw)
     if (!result.success) {
@@ -64,8 +79,9 @@ export function parseCalendarInput(raw: unknown, now = new Date()): ParsedCalend
         return { ok: false, fieldErrors }
     }
 
+    const { slotMinutes } = result.data
     const fieldErrors: FieldErrors = {}
-    const slots: CalendarInput["slots"] = []
+    const ranges: { start: Date; end: Date }[] = []
 
     result.data.slots.forEach((slot, index) => {
         const start = amsterdamToUtc(slot.date, slot.start)
@@ -78,9 +94,14 @@ export function parseCalendarInput(raw: unknown, now = new Date()): ParsedCalend
         if (end <= start) {
             fieldErrors[`slots.${index}.end`] = "End time must be after the start time."
         } else if (start <= now) {
-            fieldErrors[`slots.${index}.start`] = "This slot must be in the future."
+            fieldErrors[`slots.${index}.start`] = "This range must be in the future."
+        } else if (splitIntoSlots(start, end, slotMinutes).length === 0) {
+            const minimum = slotMinutes === 30 ? "30 minutes" : "1 hour"
+            fieldErrors[`slots.${index}.end`] = `A range must be at least ${minimum} long.`
+        } else if (ranges.some((range) => start < range.end && end > range.start)) {
+            fieldErrors[`slots.${index}.start`] = "This range overlaps another one."
         } else {
-            slots.push({ start: start.toISOString(), end: end.toISOString() })
+            ranges.push({ start, end })
         }
     })
 
@@ -88,6 +109,10 @@ export function parseCalendarInput(raw: unknown, now = new Date()): ParsedCalend
 
     return {
         ok: true,
-        data: { title: result.data.title, note: result.data.note || undefined, slots },
+        data: {
+            title: result.data.title,
+            note: result.data.note || undefined,
+            slots: ranges.flatMap(({ start, end }) => splitIntoSlots(start, end, slotMinutes)),
+        },
     }
 }

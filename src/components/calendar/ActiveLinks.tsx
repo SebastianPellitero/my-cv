@@ -8,6 +8,7 @@ type ActiveLink = {
     id: string;
     title: string;
     expiresLabel: string;
+    pickLabel?: string;
 };
 
 type Props = {
@@ -62,6 +63,9 @@ export default function ActiveLinks({ origin, links }: Props) {
                                     <h3 className="font-serif text-lg text-zinc-900 dark:text-zinc-100">{link.title}</h3>
                                     <p className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
                                         Valid until {link.expiresLabel} (Amsterdam time)
+                                    </p>
+                                    <p className="mt-1 font-mono text-xs text-zinc-900 dark:text-zinc-100">
+                                        {link.pickLabel ? `Picked: ${link.pickLabel}` : "No slot picked yet"}
                                     </p>
                                 </div>
                                 <code className="font-mono text-xs break-all text-zinc-700 dark:text-zinc-300">{url}</code>

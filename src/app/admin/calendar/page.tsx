@@ -4,8 +4,8 @@ import ActiveLinks from "@/components/calendar/ActiveLinks";
 import CalendarForm from "@/components/calendar/CalendarForm";
 import LoginForm from "@/components/calendar/LoginForm";
 import { isAdmin } from "@/lib/admin-auth";
-import { listCalendars } from "@/lib/calendar/store";
-import { formatExpiry } from "@/lib/calendar/time";
+import { getPicks, listCalendars } from "@/lib/calendar/store";
+import { formatExpiry, formatSlot } from "@/lib/calendar/time";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +34,18 @@ export default async function AdminCalendarPage() {
     }
 
     const [origin, calendars] = await Promise.all([getOrigin(), listCalendars()]);
-    const links = calendars.map(({ id, title, expiresAt }) => ({
-        id,
-        title,
-        expiresLabel: formatExpiry(expiresAt),
-    }));
+    const picks = await getPicks(calendars.map((calendar) => calendar.id));
+    const links = calendars.map(({ id, title, expiresAt, slots }) => {
+        const pick = picks.get(id);
+        const pickedSlot = pick && slots[pick.slotIndex];
+
+        return {
+            id,
+            title,
+            expiresLabel: formatExpiry(expiresAt),
+            pickLabel: pickedSlot && formatSlot(pickedSlot),
+        };
+    });
 
     return (
         <div className="mx-auto max-w-3xl px-6 py-16">
