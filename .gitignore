@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# velite (generated content) + obsidian vault settings
+.velite
+public/static
+.obsidian/

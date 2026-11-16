@@ -52,17 +52,23 @@ export default async function CalendarPage({ params }: Props) {
 
     const pick = await getPick(calendar.id);
 
-    const days = groupSlotsByDay(calendar.slots).map((day) => ({
-        key: day.key,
-        label: day.label,
-        slots: day.slots.map(({ slot, index }) => ({
-            index,
-            label: formatSlot(slot),
-            time: formatTime(slot.start),
-            endTime: formatTime(slot.end),
-            start: slot.start,
-        })),
-    }));
+    // Slots that have started can't be picked any more; the visitor's own pick stays so it can still be shown
+    const now = Date.now();
+    const days = groupSlotsByDay(calendar.slots)
+        .map((day) => ({
+            key: day.key,
+            label: day.label,
+            slots: day.slots
+                .filter(({ slot, index }) => Date.parse(slot.start) > now || index === pick?.slotIndex)
+                .map(({ slot, index }) => ({
+                    index,
+                    label: formatSlot(slot),
+                    time: formatTime(slot.start),
+                    endTime: formatTime(slot.end),
+                    start: slot.start,
+                })),
+        }))
+        .filter((day) => day.slots.length > 0);
 
     return (
         <div className="mx-auto max-w-3xl px-6 py-16">
@@ -95,14 +101,23 @@ export default async function CalendarPage({ params }: Props) {
                 </p>
             </noscript>
 
-            <SlotPicker
-                id={calendar.id}
-                days={days}
-                pickedIndex={pick?.slotIndex ?? null}
-                slotMinutes={getSlotMinutes(calendar.slots)}
-                timezone={CALENDAR_TIMEZONE}
-                contactEmail={contactEmail}
-            />
+            {days.length === 0 ? (
+                <p className="mb-10 font-mono text-sm text-zinc-700 dark:text-zinc-300">
+                    All the times on this link have passed. For a new time, please email{" "}
+                    <a href={`mailto:${contactEmail}`} className={inlineLink}>
+                        {contactEmail}
+                    </a>
+                </p>
+            ) : (
+                <SlotPicker
+                    id={calendar.id}
+                    days={days}
+                    pickedIndex={pick?.slotIndex ?? null}
+                    slotMinutes={getSlotMinutes(calendar.slots)}
+                    timezone={CALENDAR_TIMEZONE}
+                    contactEmail={contactEmail}
+                />
+            )}
 
             <p className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
                 Link valid until {formatExpiry(calendar.expiresAt)} (Amsterdam time)

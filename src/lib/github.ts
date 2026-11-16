@@ -74,7 +74,7 @@ export async function getPublicRepos(): Promise<Repo[]> {
     if (GITHUB_TOKEN) headers.Authorization = `bearer ${GITHUB_TOKEN}`
 
     const res = await fetch(
-        `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=stars&per_page=50&type=public`,
+        `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=50&type=public`,
         { headers, next: { revalidate: 86400 } }
     )
 

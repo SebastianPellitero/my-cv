@@ -8,8 +8,8 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
         <Link
             href={href}
             aria-current={active ? "page" : undefined}
-            className="font-mono text-xs tracking-[0.12em] uppercase
-               inline-flex items-center min-h-10 px-2 sm:px-3
+            className="font-mono text-xs tracking-normal sm:tracking-[0.12em] uppercase
+               inline-flex items-center min-h-10 px-1 sm:px-3
                text-zinc-600 hover:text-teal-ink
                dark:text-zinc-400 dark:hover:text-teal
                aria-[current=page]:text-teal-ink dark:aria-[current=page]:text-teal
@@ -44,15 +44,16 @@ export default function NavBar() {
                 <div className="flex items-center gap-1">
                     <NavLink href="/about">Experience</NavLink>
                     <NavLink href="/projects">Projects</NavLink>
+                    <NavLink href="/garden">Garden</NavLink>
                     <a
                         href="mailto:sebastian.pellitero@gmail.com"
-                        className="font-mono text-xs tracking-[0.12em] uppercase
-                       inline-flex items-center min-h-10 ml-1 sm:ml-2 px-3 sm:px-4 rounded-sm
+                        className="font-mono text-xs tracking-normal sm:tracking-[0.12em] uppercase
+                       inline-flex items-center min-h-10 sm:ml-2 px-2 sm:px-4 rounded-sm
                        border border-teal-ink text-teal-ink hover:bg-teal-ink hover:text-white
                        dark:border-teal dark:text-teal dark:hover:bg-teal dark:hover:text-zinc-900
                        transition-colors duration-200"
                     >
-                        Email me
+                        Email<span className="hidden sm:inline">&nbsp;me</span>
                     </a>
                 </div>
 

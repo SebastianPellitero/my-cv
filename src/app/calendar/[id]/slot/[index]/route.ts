@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { buildSlotIcs } from "@/lib/calendar/ics"
 import { getCalendar } from "@/lib/calendar/store"
 
@@ -15,7 +16,8 @@ export async function GET(_request: Request, { params }: Context) {
     if (!slot) return new Response("This link has expired", { status: 404 })
 
     const ics = buildSlotIcs({
-        uid: `${id}-${index}@sebastianpellitero.dev`,
+        // Hashed, because a forwarded invite carries its UID and the id is what opens the link
+        uid: `${createHash("sha256").update(`${id}-${index}`).digest("hex").slice(0, 32)}@sebastianpellitero.dev`,
         summary: "Interview with Sebastian Pellitero",
         slot,
         stamp: new Date(),

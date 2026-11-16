@@ -20,15 +20,70 @@
   outline-offset: 2px;
 }
 
+/* ─── Reveal on scroll (home page only): IntroGate adds data-inview when an element enters the screen,
+   and un-hides everything in its <noscript> block. Don't use data-scroll-reveal outside IntroGate. ─── */
+@media (prefers-reduced-motion: no-preference) {
+  [data-scroll-reveal] {
+    opacity: 0;
+    translate: 0 24px;
+    transition: opacity 0.7s ease-out, translate 0.7s ease-out;
+  }
+  [data-scroll-reveal][data-inview] {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* ─── Garden: code blocks (rehype-pretty-code, dual Shiki theme following the OS) ─── */
+[data-rehype-pretty-code-figure] pre {
+  background-color: var(--shiki-light-bg);
+  border: 1px solid var(--color-zinc-200);
+  padding: 1rem 0;
+}
+[data-rehype-pretty-code-figure] pre [data-line] {
+  padding: 0 1rem;
+}
+[data-rehype-pretty-code-figure] code,
+[data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-light);
+}
+[data-rehype-pretty-code-title] {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-zinc-600);
+  margin: 0 0 0.5rem;
+}
+@media (prefers-color-scheme: dark) {
+  [data-rehype-pretty-code-figure] pre {
+    background-color: var(--shiki-dark-bg);
+    border-color: var(--color-zinc-800);
+  }
+  [data-rehype-pretty-code-figure] code,
+  [data-rehype-pretty-code-figure] code span {
+    color: var(--shiki-dark);
+  }
+  [data-rehype-pretty-code-title] {
+    color: var(--color-zinc-400);
+  }
+}
+
+/* Garden: [[link]] to a note that doesn't exist (yet). Wavy underline, not just colour; the sr-only text says it in words */
+.wikilink-unresolved {
+  font-style: normal;
+  color: var(--color-zinc-600);
+  text-decoration: underline wavy var(--color-accent-ink);
+  text-underline-offset: 4px;
+}
+@media (prefers-color-scheme: dark) {
+  .wikilink-unresolved {
+    color: var(--color-zinc-400);
+    text-decoration-color: var(--color-accent);
+  }
+}
+
 body.experience-page {
   overflow: hidden;
   background: #0a0f0e;
   font-family: var(--font-mono);
   color: #e8f5f2;
-}
-
-@media (pointer: fine) {
-  body.experience-page {
-    cursor: none;
-  }
 }

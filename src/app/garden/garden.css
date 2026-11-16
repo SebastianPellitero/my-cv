@@ -1,0 +1,224 @@
+/* ─── Garden: black and white, drawn in pencil ───
+   Everything under .garden uses these four values; dark mode is chalk on a blackboard. */
+.garden {
+  --paper: #ffffff;
+  --ink: #1f1f1f;
+  --soft: #5c5c5c; /* light pencil; 6.6:1 on paper */
+  --smudge: #e6e6e6;
+
+  /* The rest of the site paints with these theme colours; inside the garden they are pencil too */
+  --color-teal: var(--ink);
+  --color-teal-ink: var(--ink);
+  --color-accent: var(--soft);
+  --color-accent-ink: var(--soft);
+
+  min-height: calc(100vh - 3.625rem); /* below the nav bar, so the site's coloured backdrop never shows */
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-hand), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.1875rem;
+  line-height: 1.5;
+}
+@media (prefers-color-scheme: dark) {
+  .garden {
+    --paper: #000000;
+    --ink: #f2f2f2;
+    --soft: #a8a8a8;
+    --smudge: #2a2a2a;
+  }
+}
+
+/* The nav bar belongs to the whole site; on garden pages it loses its colour as well */
+body:has(.garden) > header {
+  filter: grayscale(1);
+}
+/* ...and spreads to the garden's wider page, so the logo and links line up with the content below */
+body:has(.garden) > header nav {
+  max-width: 80rem; /* phones keep the nav's own padding: it has no room to spare at 320px */
+}
+@media (min-width: 40rem) {
+  body:has(.garden) > header nav {
+    padding-inline: 2rem;
+  }
+}
+
+.garden :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.garden-soft {
+  color: var(--soft);
+}
+
+/* ─── Type ─── */
+.garden-title {
+  font-family: var(--font-sketch), ui-serif, serif;
+  font-weight: 700;
+  font-size: clamp(2.75rem, 9vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+.garden-heading {
+  font-family: var(--font-sketch), ui-serif, serif;
+  font-weight: 400;
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+.garden-subheading {
+  font-family: var(--font-sketch), ui-serif, serif;
+  font-weight: 400;
+  font-size: 1.375rem;
+}
+
+/* ─── Pencil strokes ───
+   Lines live on pseudo-elements so the #pencil filter (wobble + graphite grain, defined in layout.tsx)
+   roughens the stroke and leaves the text sharp. */
+.pencil-rule {
+  height: 2px;
+  border: 0;
+  background: var(--ink);
+  filter: url(#pencil);
+}
+
+.pencil-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.pencil-link:hover {
+  /* shaded in with the side of the pencil */
+  background: repeating-linear-gradient(-55deg, var(--smudge) 0 2px, transparent 2px 5px);
+}
+
+/* A slip of paper: outline drawn twice, the way a pencil goes round a box */
+.slip {
+  position: relative;
+  padding: 1.5rem 1.5rem 1.375rem;
+}
+.slip::before,
+.slip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  filter: url(#pencil);
+  pointer-events: none;
+}
+.slip::after {
+  inset: 3px -2px -3px 2px;
+  border-width: 1px;
+  border-color: var(--soft);
+  border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  opacity: 0.55;
+}
+
+/* Slips lie a little crooked in the box, and straighten when you pick one up */
+.slip-list > li:nth-child(odd) { rotate: -0.6deg; }
+.slip-list > li:nth-child(even) { rotate: 0.5deg; }
+.slip-list > li:hover,
+.slip-list > li:focus-within {
+  rotate: 0deg;
+  translate: 0 -2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slip-list > li { transition: rotate 0.2s ease-out, translate 0.2s ease-out; }
+}
+
+/* The whole slip opens the note; links inside it (tags) stay clickable above that */
+.slip-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.slip a:not(.slip-link) {
+  position: relative;
+  z-index: 1;
+}
+
+/* The filter you are on is circled */
+.pencil-circle {
+  position: relative;
+  padding: 0.125rem 0.375rem;
+}
+.pencil-circle[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset: -0.25rem -0.5rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 50% 46% 52% 48% / 55% 48% 52% 45%;
+  rotate: -3deg;
+  filter: url(#pencil);
+  pointer-events: none;
+}
+
+/* ─── The memory: the picture at the top of the garden, inside a pencil frame ─── */
+.memory {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Across a wide page the full picture would fill the screen, so it becomes a strip cropped around the basin */
+@media (min-width: 64rem) {
+  .memory {
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+  }
+}
+.memory-frame {
+  position: relative;
+  padding: 0.5rem;
+}
+.memory-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px 220px 14px 240px / 240px 12px 220px 14px;
+  filter: url(#pencil);
+  pointer-events: none;
+}
+
+/* ─── Note body ─── */
+.garden .prose {
+  --tw-prose-body: var(--ink);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-lead: var(--soft);
+  --tw-prose-links: var(--ink);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-counters: var(--soft);
+  --tw-prose-bullets: var(--soft);
+  --tw-prose-hr: var(--soft);
+  --tw-prose-quotes: var(--ink);
+  --tw-prose-quote-borders: var(--soft);
+  --tw-prose-captions: var(--soft);
+  --tw-prose-kbd: var(--ink);
+  --tw-prose-code: var(--ink);
+  --tw-prose-th-borders: var(--soft);
+  --tw-prose-td-borders: var(--smudge);
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+.garden .prose :is(h2, h3, h4) {
+  font-family: var(--font-sketch), ui-serif, serif;
+  font-weight: 400;
+}
+.garden .prose a {
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.garden .prose :not(pre) > code {
+  font-size: 0.8em;
+  background: var(--smudge);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+/* Syntax colours become shades of grey; greyscale keeps each colour's lightness, so contrast is unchanged */
+.garden [data-rehype-pretty-code-figure] {
+  filter: grayscale(1);
+}
+.garden .wikilink-unresolved {
+  color: var(--soft);
+  text-decoration-color: var(--soft);
+}

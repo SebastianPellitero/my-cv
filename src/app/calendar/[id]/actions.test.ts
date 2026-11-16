@@ -32,6 +32,7 @@ const previousPick = (slotIndex: number) => ({ slotIndex, pickedAt: "2026-11-06T
 describe("pickSlot", () => {
     beforeEach(() => {
         vi.resetAllMocks()
+        vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-06T12:00:00.000Z") })
         vi.mocked(getCalendar).mockResolvedValue(calendar)
         vi.mocked(allowPick).mockResolvedValue(true)
         vi.mocked(savePick).mockResolvedValue(null)
@@ -96,6 +97,14 @@ describe("pickSlot", () => {
         expect(await pickSlot(id, "0")).toEqual({ status: "error" })
         expect(await pickSlot(id, 99)).toEqual({ status: "error" })
         expect(savePick).not.toHaveBeenCalled()
+    })
+
+    it("rejects a slot that has already started", async () => {
+        vi.setSystemTime(new Date("2026-11-10T09:00:00.000Z"))
+
+        expect(await pickSlot(id, 0)).toEqual({ status: "error" })
+        expect(savePick).not.toHaveBeenCalled()
+        expect(await pickSlot(id, 1)).toEqual({ status: "ok" })
     })
 
     it("reports an error when Redis fails", async () => {

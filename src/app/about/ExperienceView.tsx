@@ -25,6 +25,8 @@ function PolaroidStack({ photos }: { photos: { src: string; alt: string }[] }) {
                             src={photo.src}
                             alt={photo.alt}
                             fill
+                            // A polaroid is 200px wide with 8px padding
+                            sizes="184px"
                             style={{ objectFit: 'cover' }}
                             // Images won't 404-crash the page if missing in dev
                             onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
@@ -190,7 +192,12 @@ export default function ExperienceView() {
                 // Update dots
                 document.querySelectorAll('[data-dot]').forEach((dot, i) => {
                     dot.classList.toggle(s.dotActive, i === idx)
+                    if (i === idx) dot.setAttribute('aria-current', 'true')
+                    else dot.removeAttribute('aria-current')
                 })
+
+                // The old section is hidden now, so put focus (and the screen reader) on the new one
+                inEl.querySelector<HTMLElement>('h1, h2')?.focus({ preventScroll: true })
             },
         })
 
@@ -299,6 +306,7 @@ export default function ExperienceView() {
                         data-dot
                         className={`${s.dot} ${i === 0 ? s.dotActive : ''}`}
                         onClick={() => goTo(i)}
+                        aria-current={i === 0 ? 'true' : undefined}
                         aria-label={`Go to section ${i + 1}`}
                     />
                 ))}
@@ -319,7 +327,7 @@ export default function ExperienceView() {
                         <div className={s.introLayout}>
                             <div>
                                 <div className={s.label} data-animate>Experience</div>
-                                <h1 className={s.heading} data-animate>
+                                <h1 className={s.heading} data-animate tabIndex={-1}>
                                     Nine years<br />building the<br /><em>web.</em>
                                 </h1>
                                 <p className={s.body} data-animate>
@@ -369,7 +377,7 @@ export default function ExperienceView() {
                                 <div className={s.workLayout}>
                                     <div className={s.workContent}>
                                         <div className={s.label} data-animate>{sec.period}</div>
-                                        <h2 className={s.subheading} data-animate>
+                                        <h2 className={s.subheading} data-animate tabIndex={-1}>
                                             <span className={s.year}>{sec.role}</span>
                                             {sec.company}
                                         </h2>
@@ -412,7 +420,7 @@ export default function ExperienceView() {
                         <div className={s.label} data-animate style={{ justifyContent: 'center' }}>
                             What&apos;s next
                         </div>
-                        <h2 className={s.heading} data-animate style={{ textAlign: 'center' }}>
+                        <h2 className={s.heading} data-animate tabIndex={-1} style={{ textAlign: 'center' }}>
                             Open to<br /><em>new challenges.</em>
                         </h2>
                         <p className={s.body} data-animate>

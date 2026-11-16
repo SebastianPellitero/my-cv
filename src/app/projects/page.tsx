@@ -45,31 +45,31 @@ function StarForkCount({ stars, forks }: { stars: number; forks: number }) {
     )
 }
 
-function RepoCard({ repo, featured = false }: { repo: Repo; featured?: boolean }) {
+// Same numbered-row layout as "What I focus on" on the home page
+function RepoRow({ repo, number }: { repo: Repo; number: number }) {
     return (
-        <div className={`relative overflow-hidden rounded-2xl border flex flex-col
-            border-zinc-200 bg-white
-            dark:border-zinc-800 dark:bg-zinc-900/40
-            hover:border-teal/50 focus-within:border-teal-ink dark:focus-within:border-teal transition-colors duration-300 group
-            ${featured ? "p-6" : "p-5"}`}
-        >
-            {/* Hover glow */}
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 [background:radial-gradient(300px_circle_at_50%_0%,rgba(45,212,191,0.06),transparent_70%)]" />
+        <li className="group relative grid gap-x-8 gap-y-3 border-t border-zinc-200 py-7 dark:border-zinc-800
+                       sm:grid-cols-[3rem_1fr_1.2fr] sm:items-baseline">
+            <span aria-hidden className="font-mono text-xs tracking-[0.15em] text-teal-ink dark:text-teal">
+                {String(number).padStart(2, "0")}
+            </span>
 
-            <div className="flex flex-col flex-1 gap-3">
-                {/* Name + links */}
-                <div className="flex items-start justify-between gap-2">
-                    <h3 className={`font-serif leading-tight text-zinc-900 dark:text-zinc-100 ${featured ? "text-lg" : "text-base"}`}>
-                        {/* after: overlay makes the whole card open the repo */}
-                        <a
-                            href={repo.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="after:absolute after:inset-0 group-hover:text-teal-ink dark:group-hover:text-teal transition-colors"
-                        >
+            {/* Name + links */}
+            <div className="flex items-baseline gap-3">
+                <h3 className="font-serif text-2xl sm:text-3xl leading-tight break-words text-zinc-900 dark:text-zinc-100">
+                    {/* after: overlay makes the whole row open the repo */}
+                    <a
+                        href={repo.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="after:absolute after:inset-0 group-hover:text-teal-ink dark:group-hover:text-teal transition-colors"
+                    >
+                        {/* The nudge is on a span: a moved h3 or link would shrink the overlay to itself */}
+                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-2 motion-reduce:group-hover:translate-x-0">
                             {repo.name}
-                        </a>
-                    </h3>
+                        </span>
+                    </a>
+                </h3>
                     {repo.homepageUrl && (
                         <a
                             href={repo.homepageUrl}
@@ -83,17 +83,18 @@ function RepoCard({ repo, featured = false }: { repo: Repo; featured?: boolean }
                             </svg>
                         </a>
                     )}
-                </div>
+            </div>
 
+            <div className="grid gap-3">
                 {/* Description */}
                 {repo.description && (
-                    <p className="font-mono text-xs leading-relaxed text-zinc-600 dark:text-zinc-400 flex-1">
+                    <p className="font-mono text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                         {repo.description}
                     </p>
                 )}
 
-                {/* Topics (featured only) */}
-                {featured && repo.topics.length > 0 && (
+                {/* Topics */}
+                {repo.topics.length > 0 && (
                     <ul className="flex flex-wrap gap-1.5">
                         {repo.topics.slice(0, 5).map((t) => (
                             <li
@@ -107,16 +108,14 @@ function RepoCard({ repo, featured = false }: { repo: Repo; featured?: boolean }
                 )}
 
                 {/* Language + stars/forks */}
-                <div className="flex items-center justify-between mt-auto pt-1">
-                    {repo.primaryLanguage ? (
+                <div className="flex items-center gap-5">
+                    {repo.primaryLanguage && (
                         <LanguageDot color={repo.primaryLanguage.color} name={repo.primaryLanguage.name} />
-                    ) : (
-                        <span />
                     )}
                     <StarForkCount stars={repo.stargazerCount} forks={repo.forkCount} />
                 </div>
             </div>
-        </div>
+        </li>
     )
 }
 
@@ -128,50 +127,49 @@ export default async function ProjectsPage() {
         : (await getPublicRepos()).sort((a, b) => b.stargazerCount - a.stargazerCount).slice(0, 6)
 
     return (
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
 
             {/* ── Hero ── */}
-            <header className="mb-12">
-                <div className="flex items-center gap-3 mb-4">
+            <header className="mb-16 sm:mb-20">
+                <div className="flex items-center gap-3 mb-6">
                     <span className="inline-block w-6 h-px bg-teal" />
                     <span className="text-xs tracking-[0.2em] uppercase font-mono text-teal-ink dark:text-teal">
                         Open source &amp; side projects
                     </span>
                 </div>
-                <h1 className="font-serif text-5xl sm:text-6xl leading-[1.05] tracking-[-0.02em] text-zinc-900 dark:text-zinc-100 mb-4">
+                <h1 className="font-serif text-6xl sm:text-7xl lg:text-8xl leading-[1.05] tracking-[-0.02em] text-zinc-900 dark:text-zinc-100 mb-8">
                     Projects<em className="text-teal-ink dark:text-teal">.</em>
                 </h1>
-                <p className="font-mono text-sm leading-relaxed max-w-xl text-zinc-600 dark:text-zinc-400">
+                <div className="w-12 h-0.5 bg-accent mb-8" />
+                <p className="font-mono text-sm sm:text-base leading-relaxed max-w-xl text-zinc-600 dark:text-zinc-400">
                     Things I&apos;ve built, shipped, and open-sourced. Pulled live from GitHub.
                 </p>
             </header>
 
             {/* ── Featured ── */}
             {repos.length > 0 ? (
-                <section className="mb-14" aria-labelledby="featured-heading">
+                <section aria-labelledby="featured-heading">
                     <div className="flex items-center gap-3 mb-6">
-                        <span className="inline-block w-4 h-px bg-teal" />
-                        <h2 id="featured-heading" className="font-mono text-xs tracking-[0.15em] uppercase text-teal-ink dark:text-teal">
+                        <span className="inline-block w-6 h-px bg-teal" />
+                        <h2 id="featured-heading" className="font-mono text-xs tracking-[0.2em] uppercase text-teal-ink dark:text-teal">
                             Featured
                         </h2>
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {repos.map((repo) => (
-                            <RepoCard key={repo.name} repo={repo} featured />
+                    <ol className="border-b border-zinc-200 dark:border-zinc-800">
+                        {repos.map((repo, i) => (
+                            <RepoRow key={repo.name} repo={repo} number={i + 1} />
                         ))}
-                    </div>
+                    </ol>
                 </section>
             ) : (
-                <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-12 text-center">
-                    <a
-                        href="https://github.com/SebastianPellitero"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono text-sm tracking-[0.15em] uppercase text-teal-ink border-b border-teal-ink dark:text-teal dark:border-teal pb-0.5 hover:opacity-60 transition-opacity"
-                    >
-                        Projects are on GitHub →
-                    </a>
-                </div>
+                <a
+                    href="https://github.com/SebastianPellitero"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-sm tracking-[0.15em] uppercase text-teal-ink border-b border-teal-ink dark:text-teal dark:border-teal pb-0.5 hover:opacity-60 transition-opacity"
+                >
+                    Projects are on GitHub →
+                </a>
             )}
 
         </div>

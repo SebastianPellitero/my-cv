@@ -19,7 +19,8 @@ export async function pickSlot(id: unknown, slotIndex: unknown): Promise<PickRes
         if (!calendar) return { status: "expired" };
 
         const slot = calendar.slots[parsedIndex.data];
-        if (!slot) return { status: "error" };
+        // The page hides slots that have started, but a stale tab can still send one
+        if (!slot || Date.parse(slot.start) <= Date.now()) return { status: "error" };
 
         if (!(await allowPick(calendar.id))) return { status: "limited" };
 
